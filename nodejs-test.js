@@ -30,5 +30,7 @@ arca.on('close', () => {
   console.log('disconnected from ARCA');
 });
 
-io.on('connection', function(client){});
+io.on('connection', client => {
+  console.log('connected');
+});
 io.listen(9000);
