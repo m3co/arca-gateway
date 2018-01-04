@@ -1,0 +1,29 @@
+{
+  "name": "arca-nodejs",
+  "version": "0.0.0",
+  "description": "Web-server-proxy for ARCA project",
+  "main": "README.js",
+  "scripts": {
+    "start": "node nodejs-test.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rianby64/arca-nodejs.git"
+  },
+  "keywords": [
+    "socket.io",
+    "tcp",
+    "proxy",
+    "realtime"
+  ],
+  "author": "Andres Rios <rianby64@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rianby64/arca-nodejs/issues"
+  },
+  "homepage": "https://github.com/rianby64/arca-nodejs#readme",
+  "dependencies": {
+    "socket.io": "^2.0.4"
+  }
+}
