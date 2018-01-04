@@ -32,5 +32,10 @@ arca.on('close', () => {
 
 io.on('connection', client => {
   console.log('connected');
+
+  client.on('data', data => {
+    console.log(data);
+  });
 });
+
 io.listen(9000);
