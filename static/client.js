@@ -1,6 +1,6 @@
 'use strict';
 ((io) => {
-  var client = io('http://x12.m3c.space:9000');
+  var client = io('/ws');
   client.on('connect', () => {
     console.log('connection');
 
