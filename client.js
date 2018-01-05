@@ -4,12 +4,16 @@
   client.on('connect', () => {
     console.log('connection');
 
-    var e = {
+    client.emit('data', {
+      query: 'subscribe',
+      module: 'fnCostTasks1'
+    });
+
+    client.emit('data', {
       query: 'select',
       module: 'fnCostTasks1',
       project: 5
-    };
-    client.emit('data', e);
+    });
   });
 
   client.on('response', (data) => {
