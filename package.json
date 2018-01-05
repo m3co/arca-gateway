@@ -4,8 +4,8 @@
   "description": "Web-server-proxy for ARCA project",
   "main": "README.js",
   "scripts": {
-    "start": "node nodejs-test.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "front": "http-server -c-1",
+    "back": "node nodejs-test.js"
   },
   "repository": {
     "type": "git",
@@ -24,6 +24,7 @@
   },
   "homepage": "https://github.com/rianby64/arca-nodejs#readme",
   "dependencies": {
+    "http-server": "^0.10.0",
     "socket.io": "^2.0.4"
   }
 }
