@@ -2,7 +2,7 @@
 var net = require('net');
 var io = require('socket.io')();
 
-function connectToArca() {
+function connectToArca(client) {
   var arca = new net.Socket();
   arca.sendObject = function sendObject(o) {
     arca.write(JSON.stringify(o));
@@ -17,7 +17,10 @@ function connectToArca() {
   });
 
   arca.on('data', data => {
-    console.log('data from ARCA:\n' + data);
+    var str = data.toString();
+    if (str.length > 0) {
+      client.emit('response', str);
+    }
   });
 
   arca.on('close', () => {
@@ -29,7 +32,7 @@ function connectToArca() {
 io.on('connection', client => {
   console.log('connected');
 
-  var arca = connectToArca();
+  var arca = connectToArca(client);
 
   client.on('data', data => {
     console.log(data);
