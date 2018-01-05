@@ -19,7 +19,11 @@ function connectToArca(client) {
   arca.on('data', data => {
     var str = data.toString();
     if (str.length > 0) {
-      client.emit('response', str);
+      str.split("\r\n").forEach(s => {
+        if (s.length > 0) {
+          client.emit('response', JSON.parse(s));
+        }
+      });
     }
   });
 
