@@ -14,11 +14,6 @@ function connectToArca() {
 
   arca.connect(12345, 'localhost', () => {
     console.log('connected to ARCA');
-    var e = {
-      query: 'subscribe',
-      module: 'Supplies'
-    };
-    arca.sendObject(e);
   });
 
   arca.on('data', data => {
@@ -38,6 +33,7 @@ io.on('connection', client => {
 
   client.on('data', data => {
     console.log(data);
+    arca.sendObject(data);
   });
 
   client.on('disconnect', () => {
