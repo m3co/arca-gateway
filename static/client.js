@@ -1,6 +1,6 @@
 'use strict';
 ((io) => {
-  var client = io('/ws');
+  var client = io();
   client.on('connect', () => {
     console.log('connection');
 
