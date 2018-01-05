@@ -1,6 +1,6 @@
 'use strict';
 ((io) => {
-  var client = io('http://localhost:9000');
+  var client = io('http://x12.m3c.space:9000');
   client.on('connect', () => {
     console.log('connection');
 
