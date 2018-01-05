@@ -6,8 +6,8 @@
 
     var e = {
       query: 'select',
-      from: 'Supplies',
-      module: 'Supplies'
+      module: 'fnCostTasks1',
+      project: 5
     };
     client.emit('data', e);
   });
