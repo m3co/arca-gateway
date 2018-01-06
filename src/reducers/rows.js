@@ -1,11 +1,7 @@
-const initialState = {
-    count: 0
-};
-
-export default function count(state = initialState, action) {
+export default function rows(state = [], action) {
     switch (action.type) {
         case 'GET_ROW':
-            return { ...state, count: action.payload }
+            return [ ...state, action.payload]
 
         default:
             return state;

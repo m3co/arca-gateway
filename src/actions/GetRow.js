@@ -20,10 +20,10 @@ export function getRow() {
 
     return (dispatch) => {
         client.on('response', (data) => {
-            console.log(data);
+            // console.log(data);
             dispatch({
                 type: 'GET_ROW',
-                payload: data.row.id
+                payload: data.row
             })
         });
     }
