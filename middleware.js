@@ -1,7 +1,15 @@
-
 var express = require('express');
 var proxy = require('http-proxy-middleware');
 var app = express();
+
+const webpack = require('webpack');
+const webpackDevMiddleware = require('webpack-dev-middleware');
+const webpackHotMiddleware = require('webpack-hot-middleware');
+const config = require('./webpack.config');
+
+const compiler = webpack(config);
+app.use(webpackDevMiddleware(compiler, { noInfo: true, publicPath: config.output.publicPath }));
+app.use(webpackHotMiddleware(compiler));
 
 var wsProxy = proxy('/socket.io', {
   target:'http://x12.m3c.space',
