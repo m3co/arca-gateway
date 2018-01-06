@@ -4,7 +4,6 @@ import {bindActionCreators} from 'redux';
 import * as getRow from 'src/actions/GetRow';
 
 function mapStateToProps (state) {
-    console.log(state, 'map state to props');
     return {
         rows: state.rows
     }
@@ -17,9 +16,7 @@ function mapDispatchToProps(dispatch) {
 }
 
 class App extends Component {
-    drawTableRow(row) {
-        console.log(row);
-
+    drawTableRow(row, index) {
         const style = {
             border: '1px solid red',
             padding: '15px'
@@ -30,7 +27,7 @@ class App extends Component {
         }
 
         return (
-            <div style={divStyle} key={row.ley}>
+            <div style={divStyle} key={index}>
                 <span style={style}>id: {row.id}; </span>
                 <span style={style}>keynote: {row.keynote}; </span>
                 <span style={style}>keynote: {row.parent}; </span>
@@ -45,7 +42,7 @@ class App extends Component {
 
         return (
             <div>
-                {this.props.rows ? this.props.rows.map(row => drawTr(row)) : null}
+                {this.props.rows ? this.props.rows.map((row, index) => drawTr(row, index)) : null}
                 <br />
 
                 <button onClick={() => {getRow()}}>get data</button>
