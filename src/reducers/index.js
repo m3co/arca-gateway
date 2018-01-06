@@ -1,7 +1,6 @@
-const initialState = {
-  count: 15
-};
+import {combineReducers} from 'redux';
+import count from 'src/reducers/rows';
 
-export default function countData(state = initialState) {
-  return state;
-}
+export default combineReducers({
+  count
+})

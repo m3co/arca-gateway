@@ -3,9 +3,10 @@ import React, {Component} from 'react';
 import { connect } from 'react-redux';
 
 function mapStateToProps (state) {
-  return {
-    count: state.count
-  }
+    console.log(state);
+    return {
+        count: state.count
+    }
 }
 
 class App extends Component {
