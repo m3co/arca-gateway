@@ -65,6 +65,9 @@
     "eslint": "^4.14.0",
     "eslint-loader": "^1.9.0",
     "eslint-plugin-react": "^7.5.1",
+    "react-redux": "^5.0.6",
+    "react-router-redux": "^4.0.8",
+    "redux": "^3.7.2",
     "transform-runtime": "0.0.0",
     "webpack-dev-middleware": "^2.0.3",
     "webpack-hot-middleware": "^2.21.0"
