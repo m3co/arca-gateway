@@ -2,20 +2,29 @@ import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
 import * as getRow from 'src/actions/GetRow';
+import ProjectForm from 'src/ProjectForm';
 
 function mapStateToProps (state) {
+    console.log(state, 'mapStateToProps');
     return {
         rows: state.rows
     }
 }
 
 function mapDispatchToProps(dispatch) {
-    return {
-        getRow: bindActionCreators(getRow, dispatch)
-    }
+    return bindActionCreators(getRow, dispatch);
 }
 
 class App extends Component {
+    constructor() {
+        super();
+        this.submit = this.submit.bind(this);
+    }
+
+    submit(values) {
+        this.props.getRow(values.projectId);
+    }
+
     drawTableRow(row, index) {
         return (
             <div className='row' key={index}>
@@ -28,15 +37,14 @@ class App extends Component {
     }
 
     render() {
-        const {getRow} = this.props.getRow;
         const drawTr = this.drawTableRow;
 
         return (
             <div>
-                {this.props.rows ? this.props.rows.map((row, index) => drawTr(row, index)) : null}
-                <br />
+                <ProjectForm onSubmit={this.submit}></ProjectForm>
+                {this.props.rows.length > 0 ? this.props.rows.map((row, index) => drawTr(row, index)) : null}
 
-                <button onClick={() => {getRow()}}>get data</button>
+                <br />
             </div>
         )
     }

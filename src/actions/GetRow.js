@@ -1,7 +1,7 @@
 import io from 'socket.io-client';
 
-export function getRow() {
-    var client = io();
+export function getRow(projectId) {
+    const client = io();
 
     client.on('connect', () => {
         console.log('connection');
@@ -14,13 +14,13 @@ export function getRow() {
         client.emit('data', {
             query: 'select',
             module: 'fnCostTasks1',
-            project: 11
+            project: projectId
         });
     });
 
     return (dispatch) => {
         client.on('response', (data) => {
-            console.table(data.row);
+            // console.table(data.row);
 
             dispatch({
                 type: 'GET_ROW',
