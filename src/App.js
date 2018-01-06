@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
-// import io from 'socket.io-client';
-import { connect } from 'react-redux';
+import {connect} from 'react-redux';
+import {bindActionCreators} from 'redux';
+import * as getRow from 'src/actions/GetRow';
 
 function mapStateToProps (state) {
     console.log(state);
@@ -9,47 +10,24 @@ function mapStateToProps (state) {
     }
 }
 
+function mapDispatchToProps(dispatch) {
+    return {
+        getRow: bindActionCreators(getRow, dispatch)
+    }
+}
+
 class App extends Component {
-    // constructor() {
-    //     super();
-
-    //     this.state = {
-    //         count: 0
-    //     }
-    // }
-
-    // componentWillMount() {
-    //     var client = io();
-    //     client.on('connect', () => {
-    //         console.log('connection');
-
-    //     client.emit('data', {
-    //         query: 'subscribe',
-    //         module: 'fnCostTasks1'
-    //     });
-
-    //     client.emit('data', {
-    //             query: 'select',
-    //             module: 'fnCostTasks1',
-    //             project: 11
-    //         });
-    //     });
-
-    //     client.on('response', (data) => {
-    //         console.log(data);
-    //         this.setState({ count: this.state.count + 1 })
-
-    //         console.log(this.state.count);
-    //     });
-    // }
-
     render() {
+        const { getRow } = this.props.getRow;
         return (
             <div>
-                {this.props.count}
+                {this.props.count.count}
+                <br />
+
+                <button onClick={() => {getRow(15)}}>get row</button>
             </div>
         )
     }
 }
 
-export default connect(mapStateToProps)(App);
+export default connect(mapStateToProps, mapDispatchToProps)(App);
