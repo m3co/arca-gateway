@@ -17,21 +17,12 @@ function mapDispatchToProps(dispatch) {
 
 class App extends Component {
     drawTableRow(row, index) {
-        const style = {
-            border: '1px solid red',
-            padding: '15px'
-        };
-
-        const divStyle = {
-            padding: '15px'
-        }
-
         return (
-            <div style={divStyle} key={index}>
-                <span style={style}>id: {row.id}; </span>
-                <span style={style}>keynote: {row.keynote}; </span>
-                <span style={style}>keynote: {row.parent}; </span>
-                <span style={style}>keynote: {row.description}; </span>
+            <div className='row' key={index}>
+                <span>id: {row.id}; </span>
+                <span>keynote: {row.keynote}; </span>
+                <span>keynote: {row.parent}; </span>
+                <span>keynote: {row.description}; </span>
             </div>
         )
     }
