@@ -4,7 +4,7 @@ var proxy = require('http-proxy-middleware');
 var app = express();
 
 var wsProxy = proxy('/socket.io', {
-  target:'http://localhost:9000',
+  target:'http://x12.m3c.space',
   ws:true,
   logLevel: 'debug',
   changeOrigin:true
