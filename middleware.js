@@ -3,6 +3,7 @@ var proxy = require('http-proxy-middleware');
 var app = express();
 var webpack = require('webpack');
 var config = require('./webpack.config.dev');
+var path = require('path');
 
 var compiler = webpack(config);
 
@@ -13,13 +14,16 @@ var wsProxy = proxy('/socket.io', {
   changeOrigin:true
 });
 
-
 app.use(require('webpack-dev-middleware')(compiler, {
   noInfo: true,
   publicPath: config.output.publicPath
 }));
 
 app.use(require('webpack-hot-middleware')(compiler));
+
+app.get('*', function(req, res) {
+  res.sendFile(path.join(__dirname, 'static/index.html'));
+});
 
 app.use(wsProxy);
 app.use('/socket.io', wsProxy);
