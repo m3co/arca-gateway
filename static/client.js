@@ -1,23 +1,23 @@
-'use strict';
-((io) => {
-  var client = io();
-  client.on('connect', () => {
-    console.log('connection');
+import React from 'react';
+import {render} from 'react-dom';
+import {HashRouter} from 'react-router-dom';
+import {Provider} from 'react-redux';
 
-    client.emit('data', {
-      query: 'subscribe',
-      module: 'fnCostTasks1'
-    });
+import App from 'static/App';
+import configureStore from 'static/store/configureStore';
 
-    client.emit('data', {
-      query: 'select',
-      module: 'fnCostTasks1',
-      project: 11
-    });
-  });
+const rootEl = document.getElementById('root');
+const store = configureStore();
 
-  client.on('response', (data) => {
-    console.log(data);
-    //console.log(JSON.parse(data));
-  });
-})(io);
+const renderContainer = Component => {
+    render(
+        <HashRouter>
+            <Provider store={store}>
+                <Component />
+            </Provider>
+        </HashRouter>,
+        rootEl
+    )
+}
+
+renderContainer(App);
