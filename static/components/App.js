@@ -7,7 +7,8 @@ import Main from 'static/components/Main';
 
 function mapStateToProps(state) {
     return {
-        projects: state.projects
+        projects: state.projects,
+        project: state.project
     }
 }
 

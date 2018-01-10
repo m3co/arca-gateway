@@ -3,7 +3,7 @@ import {Link} from 'react-router';
 
 class ProjectPreview extends Component{
     render(){
-        console.log(this.props);
+        // console.log(this.props);
         const project = this.props.project;
 
         return (
