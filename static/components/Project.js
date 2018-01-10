@@ -4,11 +4,14 @@ import React, {Component} from 'react';
 
 
 class Project extends Component{
+    componentDidMount() {
+        this.props.actionCreators();
+    }
+
     render(){
         return (
             <div>
                 SINGLE PROJECT
-                <button onClick={() => this.props.actionCreators()}>Get data</button>
             </div>
         )
     }
