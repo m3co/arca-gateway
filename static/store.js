@@ -9,8 +9,7 @@ import rootReducer from 'static/reducers/index';
 import projects from 'static/data/projects';
 
 const defaultState = {
-    projects,
-    project: null
+    projects
 };
 
 const store = createStore(rootReducer, defaultState, applyMiddleware(thunk));

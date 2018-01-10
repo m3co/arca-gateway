@@ -1,7 +1,7 @@
 import io from 'socket.io-client';
 
 export function actionCreators() {
-    const client = io('/socket.io');
+    const client = io();
 
     client.on('connect', () => {
         console.log('connection');
@@ -20,6 +20,8 @@ export function actionCreators() {
 
     return (dispatch) => {
         client.on('response', (data) => {
+            console.log(data);
+
             dispatch({
                 type: 'GET_PROJECT',
                 payload: data.row
