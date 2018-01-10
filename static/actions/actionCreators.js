@@ -1,7 +1,7 @@
 import io from 'socket.io-client';
 
 export function actionCreators() {
-    const client = io();
+    const client = io('/socket.io');
 
     client.on('connect', () => {
         console.log('connection');

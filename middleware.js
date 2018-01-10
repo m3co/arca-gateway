@@ -13,6 +13,7 @@ var wsProxy = proxy('/socket.io', {
   logLevel: 'debug',
   changeOrigin:true
 });
+app.use(wsProxy);
 
 app.use(require('webpack-dev-middleware')(compiler, {
   noInfo: true,
@@ -21,19 +22,9 @@ app.use(require('webpack-dev-middleware')(compiler, {
 
 app.use(require('webpack-hot-middleware')(compiler));
 
-app.get('*', function(req, res) {
+app.get('/', function(req, res) {
   res.sendFile(path.join(__dirname, 'static/index.html'));
 });
-
-app.use(wsProxy);
-app.use('/socket.io', wsProxy);
-app.use('/', proxy({
-  target: 'http://localhost:9001',
-  changeOrigin: true,
-  logLevel: 'debug',
-  secure: false,
-  xfwd: true
-}));
 
 console.log('Listening to http://localhost:1133');
 var server = app.listen(1133);
