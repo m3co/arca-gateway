@@ -1,19 +1,9 @@
-const projects = {
-    '1': [
-        'name': 'Bogota'
-    ],
-    '2': [
-        'name': 'Medellin'
-    ],
-    '3': [
-        'name': 'Cali'
-    ],
-    '4': [
-        'name': 'Barranquilla'
-    ],
-    '5': [
-        'name': 'Cartagena'
-    ]
-}
+const projects = [
+    {name: 'Bogota', id: 'sSFsafvaqrFS'},
+    {name: 'Medellin', id: 'ssSFsfsaaqrFS'}, 
+    {name: 'Cali', id: 'asfsafqwvaqrFS'}, 
+    {name: 'Barranquilla', id: 'sFAFaqwvaqrFS'}, 
+    {name: 'Cartagena', id: 'sSLLLfsFwvaqrFS'}
+ ];
 
 export default projects;
