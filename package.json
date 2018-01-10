@@ -4,7 +4,7 @@
   "description": "Web-server-proxy for ARCA project",
   "main": "README.js",
   "scripts": {
-    "front": "http-server -c-1 -p 9001 src/",
+    "front": "http-server -c-1 -p 9001 static/",
     "middle": "node middleware.js",
     "back": "node nodejs-test.js"
   },

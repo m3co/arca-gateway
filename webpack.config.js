@@ -7,22 +7,40 @@ const extractSass = new ExtractTextPlugin({
     allChunks: true
 });
 
+// ▒▒▒░░░░░░░░░░▄▐░░░░
+// ▒░░░░░░▄▄▄░░▄██▄░░░
+// ░░░░░░▐▀█▀▌░░░░▀█▄░
+// ░░░░░░▐█▄█▌░░░░░░▀█▄
+// ░░░░░░░▀▄▀░░░▄▄▄▄▄▀▀
+// ░░░░░▄▄▄██▀▀▀▀░░░░░
+// ░░░░█▀▄▄▄█░▀▀░░░░░░
+// ░░░░▌░▄▄▄▐▌▀▀▀░░░░░
+// ░▄░▐░░░▄▄░█░▀▀░░░░░
+// ░▀█▌░░░▄░▀█▀░▀░░░░░
+// ░░░░░░░░▄▄▐▌▄▄░░░░░
+// ░░░░░░░░▀███▀█░▄░░░
+// ░░░░░░░▐▌▀▄▀▄▀▐▄░░░
+// ░░░░░░░▐▀░░░░░░▐▌░░
+// ░░░░░░░█░░░░░░░░█░░
+// ░░░░░░▐▌░░░░░░░░░█░ 
+
+
 module.exports = {
     devtool: 'inline-source-map',
     entry: [
         'babel-polyfill',
         'webpack-hot-middleware/client',
-        './src/client',
-        path.resolve(__dirname, 'src') + '/styles/app.scss'
+        './static/client',
+        path.resolve(__dirname, 'static') + '/styles/app.scss'
     ],
     output: {
         path: path.join(__dirname, 'dist'),
         filename: 'bundle.js',
-        publicPath: '/static/'
+        publicPath: '/dist/'
     },
     resolve: {
         alias: {
-            src: path.resolve(__dirname, 'src/')
+            static: path.resolve(__dirname, 'static/')
         },
         extensions: ['.js']
     },
@@ -49,7 +67,7 @@ module.exports = {
                         options: {
                             sourceMap: true,
                             includePaths: [
-                                path.join(__dirname, 'src')
+                                path.join(__dirname, 'static')
                             ]
                         }
                     }],
