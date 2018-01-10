@@ -14,7 +14,7 @@ export function getRow(projectId) {
         client.emit('data', {
             query: 'select',
             module: 'fnCostTasks1',
-            project: projectId
+            project: 11
         });
     });
 
