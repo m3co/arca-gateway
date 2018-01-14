@@ -228,8 +228,10 @@ input{
 }
 
 .arca-projects-grid {
-    display: table;
-    width: 100%;
+    &-row {
+        font-size: 0;
+        margin-bottom: 20px;
+    }
 
     &-item {
         background: #f4f5f6;
@@ -257,7 +259,7 @@ input{
         }
 
         &-wrapper {
-            display: table-cell;
+            display: inline-block;
             width: 20%;
             padding: 0 10px;
         }

@@ -5,10 +5,6 @@ class Project extends Component{
         this.props.actionCreators();
     }
 
-    // componentWillReceiveProps(nextProps) {
-    //     console.log(nextProps, 'bams');
-    // }
-
     drawRow(project, index) {
         return (
             <tr key={index}>
