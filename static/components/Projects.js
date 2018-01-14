@@ -3,12 +3,12 @@ import React, {Component} from 'react';
 import ProjectPreview from 'static/components/ProjectPreview';
 
 class Projects extends Component{
-    componentDidMount() {
-        console.log('mounted', this.props.projects);
-    }
+    // componentDidMount() {
+    //     console.log('mounted', this.props.projects);
+    // }
 
     chunkProjects(array, chunkSize) {
-        console.log('chunk');
+        // console.log('chunk');
         const chunks = [];
 
         while (array.length) {
@@ -20,22 +20,25 @@ class Projects extends Component{
 
     render(){
         return (
-            <div className='arca-projects-grid'>
-                {this.chunkProjects(this.props.projects, 5).map((chunk, i) => {
-                    return (
-                        <div key={i} className='arca-projects-grid-row'>
-                            {chunk.map((project, i) => {
-                                return (
-                                    <div className='arca-projects-grid-item-wrapper' key={i}>
-                                        <ProjectPreview key={i} project={project} />
-                                    </div>
-                                )
-                            })}
-                        </div>
-                    )
-                })}
-                
+            <div>
+                {this.props.projects.map((project, i) => <ProjectPreview key={i} project={project} />)}
             </div>
+            // <div className='arca-projects-grid'>
+            //     {this.chunkProjects(this.props.projects, 5).map((chunk, i) => {
+            //         return (
+            //             <div key={i} className='arca-projects-grid-row'>
+            //                 {chunk.map((project, i) => {
+            //                     return (
+            //                         <div className='arca-projects-grid-item-wrapper' key={i}>
+            //                             <ProjectPreview key={i} project={project} />
+            //                         </div>
+            //                     )
+            //                 })}
+            //             </div>
+            //         )
+            //     })}
+                
+            // </div>
         )
     }
 }
