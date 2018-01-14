@@ -1,8 +1,19 @@
 import React, {Component} from 'react';
+import io from 'socket.io-client';
 
 class Project extends Component{
+    constructor() {
+        super();
+
+        this.client = io();
+    }
+
     componentDidMount() {
-        this.props.actionCreators();
+        this.props.getProject(this.client);
+    }
+
+    componentWillUnmount() {
+        this.props.eraseProject();
     }
 
     drawRow(project, index) {

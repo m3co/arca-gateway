@@ -1,15 +1,34 @@
 import io from 'socket.io-client';
 
-export function actionCreators() {
-    const client = io();
+export function getProjects() {
+    var client = io();
 
     client.on('connect', () => {
-        // console.log('connection');
+        console.log('connection projects');
 
         client.emit('data', {
-            query: 'subscribe',
-            module: 'fnCostTasks1'
+            query: 'select',
+            module: 'Projects',
+            from: 'Projects'
         });
+    });
+
+    return (dispatch) => {
+        client.on('response', (data) => {
+            console.log(data);
+
+            dispatch({
+                type: 'GET_PROJECTS',
+                payload: data.row
+            })
+        });
+    }
+}
+
+export function getProject(client) {
+    
+    client.on('connect', () => {
+        console.log('connection project');
 
         client.emit('data', {
             query: 'select',
@@ -20,12 +39,21 @@ export function actionCreators() {
 
     return (dispatch) => {
         client.on('response', (data) => {
-            // console.log(data);
+            console.log(data);
 
             dispatch({
                 type: 'GET_PROJECT',
                 payload: data.row
             })
         });
+    }
+}
+
+export function eraseProject() {
+    return (dispatch) => {
+        dispatch({
+            type: 'ERASE_PROJECT',
+            payload: []
+        })
     }
 }

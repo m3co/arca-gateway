@@ -6,7 +6,6 @@ import * as actionCreators from 'static/actions/actionCreators';
 import Main from 'static/components/Main';
 
 function mapStateToProps(state) {
-    console.log(state);
     return {
         projects: state.projects,
         project: state.project

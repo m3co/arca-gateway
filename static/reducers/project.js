@@ -3,6 +3,9 @@ function project(state = [], action) {
         case 'GET_PROJECT':
             return [...state, action.payload];
 
+        case 'ERASE_PROJECT':
+            return [];
+
         default:
             return state;
     }
