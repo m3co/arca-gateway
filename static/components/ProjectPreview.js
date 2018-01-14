@@ -7,9 +7,9 @@ class ProjectPreview extends Component{
         const project = this.props.project;
 
         return (
-            <div>
+            <li>
                 <Link to={`/project/${project.id}`}>{project.name}</Link>
-            </div>
+            </li>
         )
     }
 }

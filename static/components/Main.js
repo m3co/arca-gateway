@@ -4,11 +4,14 @@ import {Link} from 'react-router';
 class Main extends Component{
     render(){
         return (
-            <div>
+            <div className='wrapper'>
                 <h1>
                     <Link to='/'>Arca</Link>
                 </h1>
-                {React.cloneElement(this.props.children, this.props)}
+                
+                <div className='container'>
+                    {React.cloneElement(this.props.children, this.props)}
+                </div>
             </div>
         )
     }

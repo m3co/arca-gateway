@@ -6,9 +6,9 @@ import ProjectPreview from 'static/components/ProjectPreview';
 class Projects extends Component{
     render(){
         return (
-            <div>
+            <ol>
                 {this.props.projects.map((project, i) => <ProjectPreview key={i} project={project} />)}
-            </div>
+            </ol>
         )
     }
 }
