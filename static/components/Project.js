@@ -7,9 +7,32 @@ class Project extends Component{
 
     render(){
         return (
-            <div>
-                SINGLE PROJECT
-            </div>
+            <table className='arca-table'>
+                <thead>
+                    <tr>
+                        <th>id</th>
+                        <th>keynote</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>12414</td>
+                        <td>214124555 testiro</td>
+                    </tr>
+                    <tr>
+                        <td>12414</td>
+                        <td>214124555 testiro</td>
+                    </tr>
+                    <tr>
+                        <td>12414</td>
+                        <td>214124555 testiro</td>
+                    </tr>
+                    <tr>
+                        <td>12414</td>
+                        <td>214124555 testiro</td>
+                    </tr>
+                </tbody>
+            </table>
         )
     }
 }
