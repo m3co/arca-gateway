@@ -1,7 +1,7 @@
 import io from 'socket.io-client';
 
-export function getProjects() {
-    var client = io();
+export function getProjects(client) {
+    // var client = io();
 
     client.on('connect', () => {
         console.log('connection projects');

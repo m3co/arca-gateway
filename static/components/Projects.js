@@ -1,11 +1,17 @@
 import React, {Component} from 'react';
+import io from 'socket.io-client';
 
 import ProjectPreview from 'static/components/ProjectPreview';
 
 class Projects extends Component{
-    // componentDidMount() {
-    //     console.log('mounted', this.props.projects);
-    // }
+    constructor() {
+        super();
+        this.client = io();
+    }
+
+    componentDidMount() {
+        this.props.getProjects(this.client);
+    }
 
     render(){
         return (

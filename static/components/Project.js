@@ -4,7 +4,6 @@ import io from 'socket.io-client';
 class Project extends Component{
     constructor() {
         super();
-
         this.client = io();
     }
 
