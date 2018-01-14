@@ -7,9 +7,9 @@ class ProjectPreview extends Component{
         const project = this.props.project;
 
         return (
-            <li>
-                <Link to={`/project/${project.id}`}>{project.name}</Link>
-            </li>
+            <Link className='arca-projects-grid-item' to={`/project/${project.id}`}>
+                <span>{project.name}</span>
+            </Link>
         )
     }
 }

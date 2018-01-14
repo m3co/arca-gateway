@@ -4,7 +4,7 @@ export function actionCreators() {
     const client = io();
 
     client.on('connect', () => {
-        console.log('connection');
+        // console.log('connection');
 
         client.emit('data', {
             query: 'subscribe',
@@ -20,7 +20,7 @@ export function actionCreators() {
 
     return (dispatch) => {
         client.on('response', (data) => {
-            console.log(data);
+            // console.log(data);
 
             dispatch({
                 type: 'GET_PROJECT',
