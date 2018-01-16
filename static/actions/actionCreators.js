@@ -34,7 +34,7 @@ export function getProject(client, id) {
 
     return (dispatch) => {
         client.on('response', (data) => {
-            console.log(data);
+            // console.log(data);
 
             dispatch({
                 type: 'GET_PROJECT',

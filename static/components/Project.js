@@ -15,7 +15,10 @@ class Project extends Component{
         this.props.eraseProject();
     }
 
+
     drawRow(project, index) {
+        const fixheaders = ['keynote', 'connectedWith', 'id', 'parent', 'description', 'expand', 'constrain', 'start', 'end'];
+
         return (
             <tr key={index}>
                 <td>{project.id}</td>
@@ -27,7 +30,13 @@ class Project extends Component{
                 <td>{project.start}</td>
                 <td>{project.end}</td>
                 <td className='arca-table-correct'>
-                    {project.iscorrect ? <img src={require('../assets/check.png')} /> : <img src={require('../assets/times.png')} /> }
+                    {
+                        project.iscorrect 
+                        ? 
+                        <img src={require('../assets/check.png')} /> 
+                        : 
+                        <img src={require('../assets/times.png')} /> 
+                    }
                 </td>
                 <td>{project.connectwith}</td>
             </tr>
