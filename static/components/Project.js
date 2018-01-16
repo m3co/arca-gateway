@@ -26,7 +26,9 @@ class Project extends Component{
                 <td>{project.constrain}</td>
                 <td>{project.start}</td>
                 <td>{project.end}</td>
-                <td>{project.iscorrect}</td>
+                <td className='arca-table-correct'>
+                    {project.iscorrect ? <img src={require('../assets/check.png')} /> : <img src={require('../assets/times.png')} /> }
+                </td>
                 <td>{project.connectwith}</td>
             </tr>
         )

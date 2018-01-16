@@ -222,6 +222,14 @@ input{
 
                     text-align: left;
                 }
+
+                &.arca-table-correct {
+                    text-align: center;
+
+                    img {
+                        width: 20px;
+                    }
+                }
             }
         }
     }
