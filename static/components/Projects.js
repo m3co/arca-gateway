@@ -11,12 +11,14 @@ class Projects extends Component{
 
     componentDidMount() {
         this.props.getProjects(this.client);
+
+        // console.log(this.props);
     }
 
     render(){
         return (
             <div>
-                {this.props.projects.map((project, i) => <ProjectPreview key={i} project={project} />)}
+                {this.props.project ? this.props.project.map((project, i) => <ProjectPreview key={i} project={project} />) : null}
             </div>
         )
     }

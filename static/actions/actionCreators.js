@@ -1,8 +1,4 @@
-import io from 'socket.io-client';
-
 export function getProjects(client) {
-    // var client = io();
-
     client.on('connect', () => {
         console.log('connection projects');
 
@@ -15,7 +11,7 @@ export function getProjects(client) {
 
     return (dispatch) => {
         client.on('response', (data) => {
-            console.log(data);
+            // console.log(data);
 
             dispatch({
                 type: 'GET_PROJECTS',
@@ -25,15 +21,14 @@ export function getProjects(client) {
     }
 }
 
-export function getProject(client) {
-    
+export function getProject(client, id) {
     client.on('connect', () => {
         console.log('connection project');
 
         client.emit('data', {
             query: 'select',
             module: 'fnCostTasks1',
-            project: 11
+            project: id
         });
     });
 

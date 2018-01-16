@@ -8,7 +8,7 @@ class Project extends Component{
     }
 
     componentDidMount() {
-        this.props.getProject(this.client);
+        this.props.getProject(this.client, this.props.params.id);
     }
 
     componentWillUnmount() {

@@ -6,13 +6,13 @@ import thunk from 'redux-thunk';
 // import the root reducer
 import rootReducer from 'static/reducers/index';
 
-import projects from 'static/data/projects';
+// import projects from 'static/data/projects';
 
-const defaultState = {
-    projects
-};
+// const defaultState = {
+//     projects
+// };
 
-const store = createStore(rootReducer, defaultState, applyMiddleware(thunk));
+const store = createStore(rootReducer, applyMiddleware(thunk));
 
 export const history = syncHistoryWithStore(browserHistory, store);
 
