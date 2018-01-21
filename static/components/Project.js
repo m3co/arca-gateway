@@ -16,7 +16,7 @@ class Project extends Component{
     }
 
     drawRow(project, index) {
-        const fixheaders = ['keynote', 'connectedWith', 'id', 'parent', 'description', 'expand', 'constrain', 'start', 'end'];
+        // const fixheaders = ['keynote', 'connectedWith', 'id', 'parent', 'description', 'expand', 'constrain', 'start', 'end'];
 
         return (
             <tr key={index}>

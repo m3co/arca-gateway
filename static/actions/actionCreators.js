@@ -3,6 +3,11 @@ export function getProjects(client) {
         console.log('connection projects');
 
         client.emit('data', {
+            query: 'subscribe',
+            module: 'Projects'
+        });
+
+        client.emit('data', {
             query: 'select',
             module: 'Projects',
             from: 'Projects'
@@ -34,7 +39,7 @@ export function getProject(client, id) {
 
     return (dispatch) => {
         client.on('response', (data) => {
-            // console.log(data);
+            console.log(data);
 
             dispatch({
                 type: 'GET_PROJECT',
