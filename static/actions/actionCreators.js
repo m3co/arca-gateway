@@ -52,3 +52,12 @@ export function eraseProject() {
         })
     }
 }
+
+export function eraseProjects() {
+    return (dispatch) => {
+        dispatch({
+            type: 'ERASE_PROJECTS',
+            payload: []
+        })
+    }
+}

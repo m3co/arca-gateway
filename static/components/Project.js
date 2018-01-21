@@ -15,7 +15,6 @@ class Project extends Component{
         this.props.eraseProject();
     }
 
-
     drawRow(project, index) {
         const fixheaders = ['keynote', 'connectedWith', 'id', 'parent', 'description', 'expand', 'constrain', 'start', 'end'];
 

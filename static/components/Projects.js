@@ -11,14 +11,16 @@ class Projects extends Component{
 
     componentDidMount() {
         this.props.getProjects(this.client);
+    }
 
-        // console.log(this.props);
+    componentWillUnmount() {
+        this.props.eraseProjects();
     }
 
     render(){
         return (
             <div>
-                {this.props.project ? this.props.project.map((project, i) => <ProjectPreview key={i} project={project} />) : null}
+                {this.props.projects ? this.props.projects.map((project, i) => <ProjectPreview key={i} project={project} />) : null}
             </div>
         )
     }
