@@ -8,6 +8,7 @@ class Project extends Component{
     }
 
     componentDidMount() {
+        console.log(this.props);
         this.props.getProject(this.client, this.props.params.id);
     }
 

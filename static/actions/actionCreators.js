@@ -26,6 +26,30 @@ export function getProjects(client) {
     }
 }
 
+export function redactProjects(client, id, value) {
+    console.log(client, id, value);
+
+    client.emit('data', {
+        query: 'update',
+        module: 'Projects',
+        id: id,
+        idkey: 'id',
+        value: [value],
+        key: ['name']
+    });
+
+    return (dispatch) => {
+        client.on('response', (data) => {
+            console.log(data, 'this is reponse');
+
+            dispatch({
+                type: 'CHANGE_PROJECT_NAME',
+                payload: data
+            })
+        });
+    }
+}
+
 export function getProject(client, id) {
     client.on('connect', () => {
         console.log('connection project');

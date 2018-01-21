@@ -20,7 +20,20 @@ class Projects extends Component{
     render(){
         return (
             <div>
-                {this.props.projects ? this.props.projects.map((project, i) => <ProjectPreview key={i} project={project} />) : null}
+                {
+                    this.props.projects ? 
+                    this.props.projects.map((project, i) => {
+                        return (
+                            <ProjectPreview 
+                                key={i} 
+                                project={project}
+                                client={this.client}
+                                redact={this.props.redactProjects}
+                            />
+                        )
+                    })
+                    : null
+                }
             </div>
         )
     }

@@ -4,12 +4,13 @@ import {Link} from 'react-router';
 class ProjectPreview extends Component{
     constructor() {
         super();
+
         this.onInputKeypress = this.onInputKeypress.bind(this);
     }
 
     onInputKeypress(e) {
         if (e.key === 'Enter') {
-            console.log(this.refs.nameInput.value);
+            this.props.redact(this.props.client, this.props.project.id, this.refs.nameInput.value);
         }
     }
 
