@@ -2,15 +2,15 @@ import React, {Component} from 'react';
 import {Link} from 'react-router';
 
 class ProjectPreview extends Component{
-    onInputKeypress(event) {
-        if (event.key === 'Enter') {
-            console.log('submit');
-        }
+    constructor() {
+        super();
+        this.onInputKeypress = this.onInputKeypress.bind(this);
     }
 
-    onInputChange(event) {
-        console.log(event.target.value);
-        // this.setState({project: event.target.value});
+    onInputKeypress(e) {
+        if (e.key === 'Enter') {
+            console.log(this.refs.nameInput.value);
+        }
     }
 
     onInputFocus(e) {
@@ -28,7 +28,6 @@ class ProjectPreview extends Component{
                     ref='nameInput'
                     onClick={this.onInputFocus.bind(event)}
                     onKeyPress={this.onInputKeypress}
-                    onChange={this.onInputChange}
                 />
             </Link>
         )
