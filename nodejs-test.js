@@ -21,7 +21,15 @@ function connectToArca(client) {
     if (str.length > 0) {
       str.split("\r\n").forEach(s => {
         if (s.length > 0) {
-          client.emit('response', JSON.parse(s));
+          var msg;
+          try {
+            msg = JSON.parse(s);
+          } catch(e) {
+            console.log(`something went wrong with JSON.parse ${s}`);
+            console.log(e);
+            return;
+          }
+          client.emit('response', msg);
         }
       });
     }
