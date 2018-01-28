@@ -2,7 +2,19 @@ import React, {Component} from 'react';
 
 class Project extends Component{
     componentDidMount() {
-        this.props.getProject(this.props.children, this.props.params.id); // тут как видишь this.proips.children === наш socket
+        const client = this.props.children;
+
+        client.emit('data', {
+            query: 'select',
+            module: 'fnCostTasks1',
+            project: this.props.params.id
+        });
+
+        // client.on('response', (data) => {
+        //     console.log(data);
+        // });
+
+        this.props.getProject(client);
     }
 
     componentWillUnmount() {
@@ -10,8 +22,6 @@ class Project extends Component{
     }
 
     drawRow(project, index) {
-        // const fixheaders = ['keynote', 'connectedWith', 'id', 'parent', 'description', 'expand', 'constrain', 'start', 'end'];
-
         return (
             <tr key={index}>
                 <td>{project.id}</td>

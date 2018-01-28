@@ -6,7 +6,15 @@ class Main extends Component{
     constructor() {
         super();
         this.client = io();
+
+        this.client.on('connect', () => {
+            this.client.emit('data', {
+                query: 'subscribe',
+                module: 'Projects'
+            });
+        });
     }
+
     render(){
         return (
             <div className='wrapper'>

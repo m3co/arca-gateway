@@ -4,7 +4,19 @@ import ProjectPreview from 'static/components/ProjectPreview';
 
 class Projects extends Component{
     componentDidMount() {
-        this.props.getProjects(this.props.children);
+        const client = this.props.children;
+
+        client.emit('data', {
+            query: 'select',
+            module: 'Projects',
+            from: 'Projects'
+        });
+
+        // client.on('response', (data) => {
+        //     console.log(data);
+        // });
+
+        this.props.getProjects(client);
     }
 
     componentWillUnmount() {

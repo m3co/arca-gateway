@@ -1,18 +1,6 @@
 export function getProjects(client) {
-    client.on('connect', () => {
-        client.emit('data', {
-            query: 'subscribe',
-            module: 'Projects'
-        });
-
-        client.emit('data', {
-            query: 'select',
-            module: 'Projects',
-            from: 'Projects'
-        });
-    });
-
     return (dispatch) => {
+        client.off('response');
         client.on('response', (data) => {
             dispatch({
                 type: 'GET_PROJECTS',
@@ -23,7 +11,7 @@ export function getProjects(client) {
 }
 
 export function redactProjects(client, id, value) {
-
+    client.off('response');
     client.emit('data', {
         query: 'update',
         module: 'Projects',
@@ -34,6 +22,7 @@ export function redactProjects(client, id, value) {
     });
 
     return (dispatch) => {
+        client.off('response');
         client.on('response', (data) => {
             dispatch({
                 type: 'CHANGE_PROJECT_NAME',
@@ -43,14 +32,9 @@ export function redactProjects(client, id, value) {
     }
 }
 
-export function getProject(client, id) {
-    client.emit('data', {
-        query: 'select',
-        module: 'fnCostTasks1',
-        project: id
-    });
-
+export function getProject(client) {
     return (dispatch) => {
+        client.off('response');
         client.on('response', (data) => {
             dispatch({
                 type: 'GET_PROJECT',
