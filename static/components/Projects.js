@@ -1,16 +1,10 @@
 import React, {Component} from 'react';
-import io from 'socket.io-client';
 
 import ProjectPreview from 'static/components/ProjectPreview';
 
 class Projects extends Component{
-    constructor() {
-        super();
-        this.client = io();
-    }
-
     componentDidMount() {
-        this.props.getProjects(this.client);
+        this.props.getProjects(this.props.children);
     }
 
     componentWillUnmount() {
@@ -27,7 +21,7 @@ class Projects extends Component{
                             <ProjectPreview 
                                 key={i} 
                                 project={project}
-                                client={this.client}
+                                client={this.props.children}
                                 redact={this.props.redactProjects}
                             />
                         )

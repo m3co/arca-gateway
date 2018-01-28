@@ -1,15 +1,8 @@
 import React, {Component} from 'react';
-import io from 'socket.io-client';
 
 class Project extends Component{
-    constructor() {
-        super();
-        this.client = io();
-    }
-
     componentDidMount() {
-        console.log(this.props);
-        this.props.getProject(this.client, this.props.params.id);
+        this.props.getProject(this.props.children, this.props.params.id); // тут как видишь this.proips.children === наш socket
     }
 
     componentWillUnmount() {

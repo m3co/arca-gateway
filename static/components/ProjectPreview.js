@@ -10,6 +10,7 @@ class ProjectPreview extends Component{
 
     onInputKeypress(e) {
         if (e.key === 'Enter') {
+            // console.log(this.props);
             this.props.redact(this.props.client, this.props.project.id, this.refs.nameInput.value);
         }
     }
