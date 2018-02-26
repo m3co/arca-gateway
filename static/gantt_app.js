@@ -1,19 +1,20 @@
 'use strict';
 (() => {
-  const COLORS = ['brown', 'red', 'blue', 'maroon', 'darkgreen'];
-  fetch('example.json')
-    .then(response => response.json())
-    .then(tasks => {
-      render(tasks.map(d => {
-        if (d.expand) {
-          [d.start, d.end] = [null, null];
-        } else {
-          [d.start, d.end] = [new Date(d.start), new Date(d.end)];
-        }
-        return d;
-      }));
-    });
+  var gantt = {
+    init: init,
+    COLORS: ['brown', 'red', 'blue', 'maroon', 'darkgreen']
+  };
+  window.gantt = gantt;
 
+function init(edges) {
+  var svgWidth = document.querySelector('svg').getAttribute('width');
+  // set the ranges
+  var x = d3.scaleTime().range([0, svgWidth]);
+  x.domain([edges.start, edges.end]);
+
+  d3.select('svg g#xaxis')
+    .call(d3.axisBottom(x));
+}
 function render(tasks) {
   var tempSymbol = Symbol();
   function dragstarted(d) {
@@ -82,10 +83,7 @@ function render(tasks) {
       });
   }
 
-  var tooltip = d3.select("body").append("div")
-    .attr("class", "tooltip")
-    .style("opacity", 0);
-
+  var tooltip = d3.select("body div.tooltip");
   var svgWidth = document.querySelector('svg').getAttribute('width');
   var svgHeight = document.querySelector('svg').getAttribute('height');
   var xaxisHeight = 22;
