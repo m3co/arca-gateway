@@ -6,14 +6,16 @@
 
     client.emit('data', {
       query: 'subscribe',
-      module: 'fnCostTasks1'
+      module: 'Tasks'
     });
 
+    /*
     client.emit('data', {
       query: 'select',
-      module: 'fnCostTasks1',
-      project: 11
+      module: 'Tasks',
+      project: 3
     });
+    */
   });
 
   client.on('response', (data) => {
