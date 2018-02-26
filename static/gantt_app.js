@@ -107,22 +107,12 @@ function doselect(row) {
     .attr('transform', `translate(0, ${xaxisHeight})`)
     .selectAll('g.row').data(tasks);
 
+  a.attr('class', calculateClass);
   var g1 = a.enter().append('g')
     .attr('transform', (d, i) => `translate(0, ${i * (h + 0)})`)
     .attr('y', (d, i) => i * h)
     .attr('id', d => d.APUId)
-    .attr('class', function(d) {
-      d.APUId.match(/\d+[.]{0,1}/g).reduce((acc, c, i, arr) => {
-        if (arr.length == i + 1) {
-          return acc;
-        }
-        acc += c;
-        d3.select(`svg g#tasks g[id="${acc.slice(0, -1)}"]`)
-          .classed(d.APUId, true);
-        return acc;
-      }, '');
-      return `row ${d.APUId}`;
-    });
+    .attr('class', calculateClass);
 
   g1.append('rect')
     .attr('class', 'background')
@@ -159,41 +149,7 @@ function doselect(row) {
     .attr('class', 'bar')
     .attr('y', padh / 2)
     .attr('height', h - padh)
-    .attr('width', d => {
-      if (d.expand) {
-        return 0
-      }
-      d.APUId.match(/\d+[.]{0,1}/g).reduce((acc, c, i, arr) => {
-        if (arr.length == i + 1) {
-          return acc;
-        }
-        acc += c;
-        d3.select(`svg g#tasks g[id="${acc.slice(0, -1)}"] rect.bar`)
-          .attr('width', c => {
-            if (c.start) {
-              c.start = c.start > d.start ? new Date(d.start) : c.start;
-            } else {
-              if (d.start) {
-                c.start = new Date(d.start);
-              }
-            }
-            if (c.end) {
-              c.end = c.end < d.end ? new Date(d.end) : c.end;
-            } else {
-              if (d.end) {
-                c.end = new Date(d.end);
-              }
-            }
-            return x(c.end) - x(c.start);
-          });
-        d3.select(`svg g#tasks g[id="${acc.slice(0, -1)}"] g`)
-          .attr('transform', c =>
-            `translate(${x(c.start)}, 0)`
-          );
-        return acc;
-      }, '');
-      return x(d.end) - x(d.start);
-    })
+    .attr('width', calculateWidth)
     .attr('fill', d => {
       var p = d.APUId.match(/[.]/g);
       if (d.expand) {
@@ -209,5 +165,54 @@ function doselect(row) {
     .attr('fill', 'white')
     .attr('y', h - padh)
     .text(d => d.APUId);
+}
+
+function calculateClass(d) {
+  console.log('calculate class', d.APUId);
+  d.APUId.match(/\d+[.]{0,1}/g).reduce((acc, c, i, arr) => {
+    if (arr.length == i + 1) {
+      return acc;
+    }
+    acc += c;
+    d3.select(`svg g#tasks g[id="${acc.slice(0, -1)}"]`)
+      .classed(d.APUId, true);
+    return acc;
+  }, '');
+  return `row ${d.APUId}`;
+}
+function calculateWidth(d) {
+  if (d.expand) {
+    return 0
+  }
+  d.APUId.match(/\d+[.]{0,1}/g).reduce((acc, c, i, arr) => {
+    if (arr.length == i + 1) {
+      return acc;
+    }
+    acc += c;
+    d3.select(`svg g#tasks g[id="${acc.slice(0, -1)}"] rect.bar`)
+      .attr('width', c => {
+        if (c.start) {
+          c.start = c.start > d.start ? new Date(d.start) : c.start;
+        } else {
+          if (d.start) {
+            c.start = new Date(d.start);
+          }
+        }
+        if (c.end) {
+          c.end = c.end < d.end ? new Date(d.end) : c.end;
+        } else {
+          if (d.end) {
+            c.end = new Date(d.end);
+          }
+        }
+        return x(c.end) - x(c.start);
+      });
+    d3.select(`svg g#tasks g[id="${acc.slice(0, -1)}"] g`)
+      .attr('transform', c =>
+        `translate(${x(c.start)}, 0)`
+      );
+    return acc;
+  }, '');
+  return x(d.end) - x(d.start);
 }
 })();
