@@ -23,7 +23,6 @@
     var dstart = x.invert(d3.event.x - d[tempSymbol]) - d.start.valueOf();
     d3.select(`svg g#tasks g.row[id="${d.APUId}"]`)
       .each(function() {
-        console.log('arrange dragend upper elements');
         [...this.classList].splice(1).forEach(b => {
           d3.select(`svg g#tasks g.row[id="${b}"]`)
             .each(function(c) {
@@ -108,7 +107,7 @@ function doselect(row) {
     .attr('transform', `translate(0, ${xaxisHeight})`)
     .selectAll('g.row').data(tasks);
 
-  a.attr('class', calculateClass);
+  //a.attr('class', calculateClass);
   var g1 = a.enter().append('g')
     .attr('transform', (d, i) => `translate(0, ${i * (h + 0)})`)
     .attr('y', (d, i) => i * h)
