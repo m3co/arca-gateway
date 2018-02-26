@@ -30,8 +30,14 @@
       });
     }
     if (data.query == 'select') {
-      data.row.start = new Date(data.row.start);
-      data.row.end = new Date(data.row.end);
+      if (data.row.expand) {
+        delete data.row.start;
+        delete data.row.end;
+      } else {
+        data.row.start = new Date(data.row.start);
+        data.row.end = new Date(data.row.end);
+      }
+      data.row.description = '';
       gantt.doselect(data.row);
     }
   });

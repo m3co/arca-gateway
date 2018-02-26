@@ -168,7 +168,6 @@ function doselect(row) {
 }
 
 function calculateClass(d) {
-  console.log('calculate class', d.APUId);
   d.APUId.match(/\d+[.]{0,1}/g).reduce((acc, c, i, arr) => {
     if (arr.length == i + 1) {
       return acc;
