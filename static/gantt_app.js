@@ -21,8 +21,9 @@
   }
   function dragended(d) {
     var dstart = x.invert(d3.event.x - d[tempSymbol]) - d.start.valueOf();
-    d3.select(`svg g#tasks g.row[id="${d.id}"]`)
+    d3.select(`svg g#tasks g.row[id="${d.APUId}"]`)
       .each(function() {
+        console.log('arrange dragend upper elements');
         [...this.classList].splice(1).forEach(b => {
           d3.select(`svg g#tasks g.row[id="${b}"]`)
             .each(function(c) {
@@ -35,7 +36,7 @@
       });
     delete d[tempSymbol];
 
-    d3.selectAll(`svg g#tasks g.row[class~="${d.id}"]`)
+    d3.selectAll(`svg g#tasks g.row[class~="${d.APUId}"]`)
       .each(function(c) {
         if (c.expand) {
           [c.start, c.end] = [null, null];
@@ -46,7 +47,7 @@
           [...this.classList].splice(1).forEach(b => {
             d3.select(`svg g#tasks g.row[id="${b}"]`)
               .each(a => {
-                if (a.id === c.id) {
+                if (a.APUId === c.APUId) {
                   return;
                 }
                 if (c.start && a.start) {
