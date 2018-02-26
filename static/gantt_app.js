@@ -1,21 +1,16 @@
 'use strict';
 (() => {
   var gantt = {
+    tasks: [],
     init: init,
+    doselect: doselect,
     COLORS: ['brown', 'red', 'blue', 'maroon', 'darkgreen']
   };
   window.gantt = gantt;
+  var x;
+  var svgWidth;
+  var svgHeight;
 
-function init(edges) {
-  var svgWidth = document.querySelector('svg').getAttribute('width');
-  // set the ranges
-  var x = d3.scaleTime().range([0, svgWidth]);
-  x.domain([edges.start, edges.end]);
-
-  d3.select('svg g#xaxis')
-    .call(d3.axisBottom(x));
-}
-function render(tasks) {
   var tempSymbol = Symbol();
   function dragstarted(d) {
     d[tempSymbol] = d3.event.x - x(d.start);
@@ -82,34 +77,30 @@ function render(tasks) {
         }
       });
   }
-
-  var tooltip = d3.select("body div.tooltip");
-  var svgWidth = document.querySelector('svg').getAttribute('width');
-  var svgHeight = document.querySelector('svg').getAttribute('height');
-  var xaxisHeight = 22;
-
-  var tasksHeight = svgHeight - xaxisHeight;
-  var h = tasksHeight / tasks.length;
-  var startend = tasks.reduce((acc, d) => {
-    if (d.expand) {
-      return acc;
-    }
-    acc.start = acc.start ?
-      (acc.start > d.start ? d.start : acc.start) : d.start;
-    acc.end = acc.end ?
-      (acc.end < d.end ? d.end : acc.end) : d.end;
-    return acc;
-  }, { start: undefined, end: undefined });
-
+function init(edges) {
+  svgWidth = document.querySelector('svg').getAttribute('width');
+  svgHeight = document.querySelector('svg').getAttribute('height');
   // set the ranges
-  var x = d3.scaleTime().range([0, svgWidth]);
-  x.domain([startend.start, startend.end]);
+  x = d3.scaleTime().range([0, svgWidth]);
+  x.domain([edges.start, edges.end]);
 
-  var a = d3.select('svg g#xaxis')
+  d3.select('svg g#xaxis')
     .call(d3.axisBottom(x))
     .selectAll('svg g#xaxis .tick line')
       .attr('y2', svgHeight)
       .attr('opacity', 0.2);
+
+  gantt.x = x;
+}
+function doselect(row) {
+  gantt.tasks.push(row);
+  var tasks = gantt.tasks;
+  var COLORS = gantt.COLORS;
+  var tooltip = d3.select("body div.tooltip");
+  var xaxisHeight = 22;
+
+  var tasksHeight = svgHeight - xaxisHeight;
+  var h = 24;
 
   var padh = 4;
   var a = d3.select('svg g#tasks')
@@ -119,18 +110,18 @@ function render(tasks) {
   var g1 = a.enter().append('g')
     .attr('transform', (d, i) => `translate(0, ${i * (h + 0)})`)
     .attr('y', (d, i) => i * h)
-    .attr('id', d => d.id)
+    .attr('id', d => d.APUId)
     .attr('class', function(d) {
-      d.id.match(/\d+[.]{0,1}/g).reduce((acc, c, i, arr) => {
+      d.APUId.match(/\d+[.]{0,1}/g).reduce((acc, c, i, arr) => {
         if (arr.length == i + 1) {
           return acc;
         }
         acc += c;
         d3.select(`svg g#tasks g[id="${acc.slice(0, -1)}"]`)
-          .classed(d.id, true);
+          .classed(d.APUId, true);
         return acc;
       }, '');
-      return `row ${d.id}`;
+      return `row ${d.APUId}`;
     });
 
   g1.append('rect')
@@ -150,7 +141,7 @@ function render(tasks) {
       tooltip.transition()
         .duration(200)
         .style("opacity", .9);
-      tooltip.html(`${d.id}<br>${d.description}`)
+      tooltip.html(`${d.APUId}<br>${d.description}`)
         .style("left", (d3.event.pageX) + "px")
         .style("top", (d3.event.pageY - 30) + "px");
     })
@@ -172,7 +163,7 @@ function render(tasks) {
       if (d.expand) {
         return 0
       }
-      d.id.match(/\d+[.]{0,1}/g).reduce((acc, c, i, arr) => {
+      d.APUId.match(/\d+[.]{0,1}/g).reduce((acc, c, i, arr) => {
         if (arr.length == i + 1) {
           return acc;
         }
@@ -204,7 +195,7 @@ function render(tasks) {
       return x(d.end) - x(d.start);
     })
     .attr('fill', d => {
-      var p = d.id.match(/[.]/g);
+      var p = d.APUId.match(/[.]/g);
       if (d.expand) {
         if (p) {
           return COLORS[p.length];
@@ -217,6 +208,6 @@ function render(tasks) {
   g.append('text')
     .attr('fill', 'white')
     .attr('y', h - padh)
-    .text(d => d.id);
+    .text(d => d.APUId);
 }
 })();

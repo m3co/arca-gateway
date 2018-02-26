@@ -16,11 +16,9 @@
     });
   });
 
+  var gantt = window.gantt;
   client.on('response', (data) => {
-    console.log(data);
-
     if (data.query == 'get-edges') {
-      var gantt = window.gantt;
       data.row.start = new Date(data.row.start);
       data.row.end = new Date(data.row.end);
 
@@ -30,6 +28,11 @@
         module: 'Tasks',
         project: 3
       });
+    }
+    if (data.query == 'select') {
+      data.row.start = new Date(data.row.start);
+      data.row.end = new Date(data.row.end);
+      gantt.doselect(data.row);
     }
   });
 })(io);
