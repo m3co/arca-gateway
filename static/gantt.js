@@ -60,5 +60,8 @@
       data.row.end = new Date(data.row.end);
       gantt.doupdate(data.row);
     }
+    if (data.query == 'delete') {
+      gantt.dodelete(data.row);
+    }
   });
 })(io);

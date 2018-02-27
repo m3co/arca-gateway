@@ -5,6 +5,7 @@
     init: init,
     doselect: doselect,
     doupdate: doupdate,
+    dodelete: dodelete,
     update: fakesendupdate,
     COLORS: ['brown', 'red', 'blue', 'maroon', 'darkgreen']
   };
@@ -12,6 +13,7 @@
   var x;
   var svgWidth;
   var svgHeight;
+  var h = 24;
 
   var tempSymbol = Symbol();
   var updateSymbol = Symbol();
@@ -27,7 +29,6 @@
   }
   function dragended(d) {
     var p = x.invert(d3.event.x - d[tempSymbol]);
-    //p = new Date(`${p.getFullYear()}-${p.getMonth() < 9 ? '0' : ''}${p.getMonth() + 1}-${p.getDate()}`);
     var dstart = p - d.start.valueOf();
     d3.select(`svg g#tasks g.row[id="${d.APUId}"]`)
       .each(function() {
@@ -109,7 +110,22 @@ function init(edges) {
 
   gantt.x = x;
 }
+function dodelete(row) {
+  var i = gantt.tasks.findIndex(r => r.id == row.id);
+  gantt.tasks.splice(i, 1);
+  d3.select(`svg g#tasks g.row[id="${row.APUId}"]`).remove();
+  d3.select('svg g#tasks')
+    .selectAll('g.row').data(gantt.tasks)
+      .attr('transform', (d, i) => `translate(0, ${i * (h + 0)})`)
+    .select('g rect.background')
+      .attr('fill', (d, i) => i % 2 ? 'green' : 'red');
+
+}
 function doupdate(row) {
+  var p = gantt.tasks.find(r => r.id == row.id);
+  p.start = row.start;
+  p.end = row.end;
+
   d3.select(`svg g#tasks g.row[id="${row.APUId}"] g`)
     .each(d => {
       Object.keys(d).forEach(k => {
@@ -132,7 +148,6 @@ function doselect(row) {
   var xaxisHeight = 22;
 
   var tasksHeight = svgHeight - xaxisHeight;
-  var h = 24;
 
   var padh = 4;
   var a = d3.select('svg g#tasks')
@@ -141,7 +156,6 @@ function doselect(row) {
 
   var g1 = a.enter().append('g')
     .attr('transform', (d, i) => `translate(0, ${i * (h + 0)})`)
-    .attr('y', (d, i) => i * h)
     .attr('id', d => d.APUId)
     .attr('class', calculateClass);
 
