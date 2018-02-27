@@ -26,7 +26,9 @@
       .attr('transform', `translate(${d3.event.x - d[tempSymbol]}, 0)`);
   }
   function dragended(d) {
-    var dstart = x.invert(d3.event.x - d[tempSymbol]) - d.start.valueOf();
+    var p = x.invert(d3.event.x - d[tempSymbol]);
+    //p = new Date(`${p.getFullYear()}-${p.getMonth() < 9 ? '0' : ''}${p.getMonth() + 1}-${p.getDate()}`);
+    var dstart = p - d.start.valueOf();
     d3.select(`svg g#tasks g.row[id="${d.APUId}"]`)
       .each(function() {
         [...this.classList].splice(1).forEach(b => {
@@ -34,6 +36,7 @@
             .each(function(c) {
               c.start = new Date(c.start.valueOf() + dstart);
               c.end = new Date(c.end.valueOf() + dstart);
+              gantt.update(c);
             })
             .select('g')
               .attr('transform', d => `translate(${x(d.start)}, 0)`);

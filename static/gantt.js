@@ -18,7 +18,7 @@
 
   var gantt = window.gantt;
   gantt.update = function(row) {
-    console.log(row.APUId, row.id, row.start.toISOString(), row.end.toISOString());
+    console.log(row.APUId, row.start, row.end);
   }
   client.on('response', (data) => {
     if (data.query == 'get-edges') {
