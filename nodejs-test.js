@@ -29,6 +29,7 @@ function connectToArca(client) {
             console.log(e);
             return;
           }
+          if (msg.action == 'check-conn') return;
           client.emit('response', msg);
         }
       });

@@ -1,0 +1,33 @@
+<!doctype html>
+<html>
+  <head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.js"></script>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script src="gantt_app.js"></script>
+    <script src="gantt.js"></script>
+    <style>
+      div.tooltip {
+        position: absolute;
+        text-align: center;
+        width: 60px;
+        height: 28px;
+        padding: 2px;
+        font: 12px sans-serif;
+        background: lightsteelblue;
+        border: 0px;
+        border-radius: 8px;
+        pointer-events: none;
+      }
+      svg g#tasks g g {
+        cursor: move;
+      }
+    </style>
+  </head>
+  <body>
+    <svg height=550 width=900>
+      <g id="tasks"></g>
+      <g id="xaxis"></g>
+    </svg>
+    <div class="tooltip" style="opacity:0;"></div>
+  </body>
+</html>
