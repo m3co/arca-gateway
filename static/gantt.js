@@ -18,7 +18,16 @@
 
   var gantt = window.gantt;
   gantt.update = function(row) {
-    console.log(row.APUId, row.start, row.end);
+    var event = {
+      query: 'update',
+      module: 'Tasks',
+      from: 'Tasks',
+      id: row.id,
+      idkey: 'id',
+      key: ['start', 'end'],
+      value: [row.start.toISOString(), row.end.toISOString()]
+    };
+    client.emit('data', event);
   }
   client.on('response', (data) => {
     if (data.query == 'get-edges') {
@@ -44,6 +53,9 @@
       gantt.doselect(data.row);
     }
     if (data.query == 'update') {
+      if (data.row.expand) {
+        return;
+      }
       data.row.start = new Date(data.row.start);
       data.row.end = new Date(data.row.end);
       gantt.doupdate(data.row);
