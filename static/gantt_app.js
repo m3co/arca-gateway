@@ -4,6 +4,8 @@
     tasks: [],
     init: init,
     doselect: doselect,
+    doupdate: doupdate,
+    update: fakesendupdate,
     COLORS: ['brown', 'red', 'blue', 'maroon', 'darkgreen']
   };
   window.gantt = gantt;
@@ -12,6 +14,10 @@
   var svgHeight;
 
   var tempSymbol = Symbol();
+  var updateSymbol = Symbol();
+  function fakesendupdate() {
+    console.error('defina la funcion update');
+  }
   function dragstarted(d) {
     d[tempSymbol] = d3.event.x - x(d.start);
   }
@@ -38,6 +44,10 @@
     d3.selectAll(`svg g#tasks g.row[class~="${d.APUId}"]`)
       .each(function(c) {
         if (c.expand) {
+          c[updateSymbol] = {
+            start: c.start ? new Date(c.start) : c.start,
+            end: c.end ? new Date(c.end) : c.end
+          };
           [c.start, c.end] = [null, null];
         }
       })
@@ -69,6 +79,10 @@
       })
       .each(function(c) {
         if (c.expand) {
+          if (c[updateSymbol].start.valueOf() != c.start.valueOf() ||
+              c[updateSymbol].end.valueOf() != c.end.valueOf()) {
+            gantt.update(c);
+          }
           d3.select(this)
             .select('g')
               .attr('transform', `translate(${x(c.start)}, 0)`)
@@ -92,6 +106,21 @@ function init(edges) {
 
   gantt.x = x;
 }
+function doupdate(row) {
+  d3.select(`svg g#tasks g.row[id="${row.APUId}"] g`)
+    .each(d => {
+      Object.keys(d).forEach(k => {
+        d[k] = row[k];
+      });
+    })
+    .attr('transform', (d, i) =>
+      d.expand ?
+        'translate(0,0)' :
+        `translate(${x(d.start)}, 0)`
+    )
+    .select('rect')
+      .attr('width', calculateWidth)
+}
 function doselect(row) {
   gantt.tasks.push(row);
   var tasks = gantt.tasks;
@@ -107,7 +136,6 @@ function doselect(row) {
     .attr('transform', `translate(0, ${xaxisHeight})`)
     .selectAll('g.row').data(tasks);
 
-  //a.attr('class', calculateClass);
   var g1 = a.enter().append('g')
     .attr('transform', (d, i) => `translate(0, ${i * (h + 0)})`)
     .attr('y', (d, i) => i * h)

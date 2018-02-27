@@ -17,6 +17,9 @@
   });
 
   var gantt = window.gantt;
+  gantt.update = function(row) {
+    console.log(row.APUId, row.id, row.start.toISOString(), row.end.toISOString());
+  }
   client.on('response', (data) => {
     if (data.query == 'get-edges') {
       data.row.start = new Date(data.row.start);
@@ -31,14 +34,19 @@
     }
     if (data.query == 'select') {
       if (data.row.expand) {
-        delete data.row.start;
-        delete data.row.end;
+        data.row.start = null;
+        data.row.end = null;
       } else {
         data.row.start = new Date(data.row.start);
         data.row.end = new Date(data.row.end);
       }
       data.row.description = '';
       gantt.doselect(data.row);
+    }
+    if (data.query == 'update') {
+      data.row.start = new Date(data.row.start);
+      data.row.end = new Date(data.row.end);
+      gantt.doupdate(data.row);
     }
   });
 })(io);
