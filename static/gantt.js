@@ -1,22 +1,25 @@
 'use strict';
 ((io) => {
   var client = io();
+  var gantt = window.gantt;
+  var connected = false;
   client.on('connect', () => {
     console.log('connection');
+    if (!connected) {
+      connected = true;
+      client.emit('data', {
+        query: 'subscribe',
+        module: 'Tasks'
+      });
 
-    client.emit('data', {
-      query: 'subscribe',
-      module: 'Tasks'
-    });
-
-    client.emit('data', {
-      query: 'get-edges',
-      module: 'Tasks',
-      project: 3
-    });
+      client.emit('data', {
+        query: 'get-edges',
+        module: 'Tasks',
+        project: 3
+      });
+    }
   });
 
-  var gantt = window.gantt;
   gantt.update = function(row) {
     var event = {
       query: 'update',
