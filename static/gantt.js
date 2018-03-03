@@ -23,8 +23,8 @@
   gantt.update = function(row) {
     var event = {
       query: 'update',
-      module: 'Tasks',
-      from: 'Tasks',
+      module: 'viewAPUTasks',
+      from: 'viewAPUTasks',
       id: row.id,
       idkey: 'id',
       key: ['start', 'end'],
@@ -40,7 +40,7 @@
       gantt.init(data.row);
       client.emit('data', {
         query: 'select',
-        module: 'Tasks',
+        module: 'viewAPUTasks',
         project: 3
       });
     }
