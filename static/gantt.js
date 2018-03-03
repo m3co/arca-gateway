@@ -9,12 +9,12 @@
       connected = true;
       client.emit('data', {
         query: 'subscribe',
-        module: 'Tasks'
+        module: 'viewAPUTasks'
       });
 
       client.emit('data', {
         query: 'get-edges',
-        module: 'Tasks',
+        module: 'viewAPUTasks',
         project: 3
       });
     }
