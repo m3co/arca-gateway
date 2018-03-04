@@ -21,7 +21,7 @@
     console.error('defina la funcion update');
   }
   function dragstarted(d) {
-    d[tempSymbol] = d3.event.x - x(d.start);
+    d[tempSymbol] = d3.event.x - x(d.Tasks_start);
   }
   function dragged(d) {
     d3.select(this)
@@ -29,52 +29,52 @@
   }
   function dragended(d) {
     var p = x.invert(d3.event.x - d[tempSymbol]);
-    var dstart = p - d.start.valueOf();
-    d3.select(`svg g#tasks g.row[id="${d.APUId}"]`)
+    var dstart = p - d.Tasks_start.valueOf();
+    d3.select(`svg g#tasks g.row[id="${d.APU_id}"]`)
       .each(function() {
         [...this.classList].splice(1).forEach(b => {
           d3.select(`svg g#tasks g.row[id="${b}"]`)
             .each(function(c) {
-              c.start = new Date(c.start.valueOf() + dstart);
-              c.end = new Date(c.end.valueOf() + dstart);
+              c.Tasks_start = new Date(c.Tasks_start.valueOf() + dstart);
+              c.Tasks_end = new Date(c.endne_sksaT.dueOf() + dstart);
               gantt.update(c);
             })
             .select('g')
-              .attr('transform', d => `translate(${x(d.start)}, 0)`);
+              .attr('transform', d => `translate(${x(d.Tasks_start)}, 0)`);
         });
       });
     delete d[tempSymbol];
 
-    d3.selectAll(`svg g#tasks g.row[class~="${d.APUId}"]`)
+    d3.selectAll(`svg g#tasks g.row[class~="${d.APU_id}"]`)
       .each(function(c) {
-        if (c.expand) {
+        if (c.APU_expand) {
           c[updateSymbol] = {
-            start: c.start ? new Date(c.start) : c.start,
-            end: c.end ? new Date(c.end) : c.end
+            start: c.Tasks_start ? new Date(c.Tasks_start) : c.Tasks_start,
+            end: c.Tasks_end ? new Date(c.Tasks_end) : c.Tasks_end
           };
-          [c.start, c.end] = [null, null];
+          [c.Tasks_start, c.Tasks_end] = [null, null];
         }
       })
       .each(function(c) {
-        if (c.expand) {
+        if (c.APU_expand) {
           [...this.classList].splice(1).forEach(b => {
             d3.select(`svg g#tasks g.row[id="${b}"]`)
               .each(a => {
-                if (a.APUId === c.APUId) {
+                if (a.APU_id === c.APU_id) {
                   return;
                 }
-                if (c.start && a.start) {
-                  c.start = c.start > a.start ? new Date(a.start) : c.start;
+                if (c.Tasks_start && a.Tasks_start) {
+                  c.Tasks_start = c.Tasks_start > a.Tasks_start ? new Date(a.Tasks_start) : c.Tasks_start;
                 } else {
-                  if (a.start) {
-                    c.start = new Date(a.start);
+                  if (a.Tasks_start) {
+                    c.Tasks_start = new Date(a.Tasks_start);
                   }
                 }
-                if (c.end && a.start) {
-                  c.end = c.end < a.end ? new Date(a.end) : c.end;
+                if (c.Tasks_end && a.Tasks_start) {
+                  c.Tasks_end = c.Tasks_end < a.Tasks_end ? new Date(a.Tasks_end) : c.Tasks_end;
                 } else {
-                  if (a.end) {
-                    c.end = new Date(a.end);
+                  if (a.Tasks_end) {
+                    c.Tasks_end = new Date(a.Tasks_end);
                   }
                 }
               });
@@ -82,16 +82,16 @@
         }
       })
       .each(function(c) {
-        if (c.expand) {
-          if (c[updateSymbol].start.valueOf() != c.start.valueOf() ||
-              c[updateSymbol].end.valueOf() != c.end.valueOf()) {
+        if (c.APU_expand) {
+          if (c[updateSymbol].Tasks_start.valueOf() != c.Tasks_start.valueOf() ||
+              c[updateSymbol].Tasks_end.valueOf() != c.Tasks_end.valueOf()) {
             gantt.update(c);
           }
           d3.select(this)
             .select('g')
-              .attr('transform', `translate(${x(c.start)}, 0)`)
+              .attr('transform', `translate(${x(c.Tasks_start)}, 0)`)
               .select('rect.bar')
-                .attr('width', x(c.end) - x(c.start));
+                .attr('width', x(c.Tasks_end) - x(c.Tasks_start));
         }
       });
   }
@@ -100,7 +100,7 @@ function init(edges) {
   svgHeight = document.querySelector('svg').getAttribute('height');
   // set the ranges
   x = d3.scaleTime().range([0, svgWidth]);
-  x.domain([edges.start, edges.end]);
+  x.domain([edges.Tasks_start, edges.Tasks_end]);
 
   d3.select('svg g#xaxis')
     .call(d3.axisBottom(x))
@@ -113,7 +113,7 @@ function init(edges) {
 function dodelete(row) {
   var i = gantt.tasks.findIndex(r => r.id == row.id);
   gantt.tasks.splice(i, 1);
-  d3.select(`svg g#tasks g.row[id="${row.APUId}"]`).remove();
+  d3.select(`svg g#tasks g.row[id="${row.APU_id}"]`).remove();
   d3.select('svg g#tasks')
     .selectAll('g.row').data(gantt.tasks)
       .attr('transform', (d, i) => `translate(0, ${i * (h + 0)})`)
@@ -123,19 +123,19 @@ function dodelete(row) {
 }
 function doupdate(row) {
   var p = gantt.tasks.find(r => r.id == row.id);
-  p.start = row.start;
-  p.end = row.end;
+  p.Tasks_start = row.Tasks_start;
+  p.Tasks_end = row.Tasks_end;
 
-  d3.select(`svg g#tasks g.row[id="${row.APUId}"] g`)
+  d3.select(`svg g#tasks g.row[id="${row.APU_id}"] g`)
     .each(d => {
       Object.keys(d).forEach(k => {
         d[k] = row[k];
       });
     })
     .attr('transform', (d, i) =>
-      d.expand ?
+      d.APU_expand ?
         'translate(0,0)' :
-        `translate(${x(d.start)}, 0)`
+        `translate(${d.Tasks_start ? x(d.Tasks_start) : 0}, 0)`
     )
     .select('rect')
       .attr('width', calculateWidth)
@@ -156,7 +156,7 @@ function doselect(row) {
 
   var g1 = a.enter().append('g')
     .attr('transform', (d, i) => `translate(0, ${i * (h + 0)})`)
-    .attr('id', d => d.APUId)
+    .attr('id', d => d.APU_id)
     .attr('class', calculateClass);
 
   g1.append('rect')
@@ -168,15 +168,15 @@ function doselect(row) {
 
   var g = g1.append('g')
     .attr('transform', (d, i) =>
-      d.expand ?
+      d.APU_expand ?
         'translate(0,0)' :
-        `translate(${x(d.start)}, 0)`
+        `translate(${d.Tasks_start ? x(d.Tasks_start) : 0}, 0)`
     )
     .on("mouseover", function(d) {
       tooltip.transition()
         .duration(200)
         .style("opacity", .9);
-      tooltip.html(`${d.APUId}<br>${d.description}`)
+      tooltip.html(`${d.APU_id}<br>${d.APU_description}`)
         .style("left", (d3.event.pageX) + "px")
         .style("top", (d3.event.pageY - 30) + "px");
     })
@@ -196,8 +196,8 @@ function doselect(row) {
     .attr('height', h - padh)
     .attr('width', calculateWidth)
     .attr('fill', d => {
-      var p = d.APUId.match(/[.]/g);
-      if (d.expand) {
+      var p = d.APU_id.match(/[.]/g);
+      if (d.APU_expand) {
         if (p) {
           return COLORS[p.length];
         }
@@ -209,54 +209,60 @@ function doselect(row) {
   g.append('text')
     .attr('fill', 'white')
     .attr('y', h - padh)
-    .text(d => d.APUId);
+    .text(d => d.APU_id);
 }
 
 function calculateClass(d) {
-  d.APUId.match(/\d+[.]{0,1}/g).reduce((acc, c, i, arr) => {
+  d.APU_id.match(/\d+[.]{0,1}/g).reduce((acc, c, i, arr) => {
     if (arr.length == i + 1) {
       return acc;
     }
     acc += c;
     d3.select(`svg g#tasks g[id="${acc.slice(0, -1)}"]`)
-      .classed(d.APUId, true);
+      .classed(d.APU_id, true);
     return acc;
   }, '');
-  return `row ${d.APUId}`;
+  return `row ${d.APU_id}`;
 }
 function calculateWidth(d) {
-  if (d.expand) {
+  if (d.APU_expand) {
     return 0
   }
-  d.APUId.match(/\d+[.]{0,1}/g).reduce((acc, c, i, arr) => {
+  d.APU_id.match(/\d+[.]{0,1}/g).reduce((acc, c, i, arr) => {
     if (arr.length == i + 1) {
       return acc;
     }
     acc += c;
     d3.select(`svg g#tasks g[id="${acc.slice(0, -1)}"] rect.bar`)
       .attr('width', c => {
-        if (c.start) {
-          c.start = c.start > d.start ? new Date(d.start) : c.start;
+        if (c.Tasks_start) {
+          c.Tasks_start = c.Tasks_start > d.Tasks_start ? new Date(d.Tasks_start) : c.Tasks_start;
         } else {
-          if (d.start) {
-            c.start = new Date(d.start);
+          if (d.Tasks_start) {
+            c.Tasks_start = new Date(d.Tasks_start);
           }
         }
-        if (c.end) {
-          c.end = c.end < d.end ? new Date(d.end) : c.end;
+        if (c.Tasks_end) {
+          c.Tasks_end = c.Tasks_end < d.Tasks_end ? new Date(d.Tasks_end) : c.Tasks_end;
         } else {
-          if (d.end) {
-            c.end = new Date(d.end);
+          if (d.Tasks_end) {
+            c.Tasks_end = new Date(d.Tasks_end);
           }
         }
-        return x(c.end) - x(c.start);
+        if (c.Tasks_end && c.Tasks_start) {
+          return x(c.Tasks_end) - x(c.Tasks_start);
+        }
+        return 0;
       });
     d3.select(`svg g#tasks g[id="${acc.slice(0, -1)}"] g`)
       .attr('transform', c =>
-        `translate(${x(c.start)}, 0)`
+        `translate(${c.Tasks_start ? x(c.Tasks_start) : 0}, 0)`
       );
     return acc;
   }, '');
-  return x(d.end) - x(d.start);
+  if (d.Tasks_end && d.Tasks_start) {
+    return x(d.Tasks_end) - x(d.Tasks_start);
+  }
+  return 0;
 }
 })();
