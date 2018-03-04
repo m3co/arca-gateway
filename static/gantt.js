@@ -51,7 +51,7 @@
         data.row.Tasks_start = data.row.Tasks_start ? new Date(data.row.Tasks_start) : null;
         data.row.Tasks_end = data.row.Tasks_end ? new Date(data.row.Tasks_end) : null;
       }
-      data.row.APU_description = '';
+      data.row.APU_description = data.row.APU_description || '';
       gantt.doselect(data.row);
     }
     if (data.query == 'update') {
