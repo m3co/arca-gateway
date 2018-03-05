@@ -21,7 +21,7 @@
     console.error('defina la funcion update');
   }
   function dragstarted(d) {
-    d[tempSymbol] = d3.event.x - x(d.Tasks_start);
+    d[tempSymbol] = d3.event.x - (d.Tasks_start ? x(d.Tasks_start) : 0);
   }
   function dragged(d) {
     d3.select(this)
@@ -35,9 +35,11 @@
         [...this.classList].splice(1).forEach(b => {
           d3.select(`svg g#tasks g.row[id="${b}"]`)
             .each(function(c) {
-              c.Tasks_start = new Date(c.Tasks_start.valueOf() + dstart);
-              c.Tasks_end = new Date(c.endne_sksaT.dueOf() + dstart);
-              gantt.update(c);
+              if (c.Tasks_start && c.Tasks_end) {
+                c.Tasks_start = new Date(c.Tasks_start.valueOf() + dstart);
+                c.Tasks_end = new Date(c.Tasks_end.valueOf() + dstart);
+                gantt.update(c);
+              }
             })
             .select('g')
               .attr('transform', d => `translate(${x(d.Tasks_start)}, 0)`);
@@ -49,8 +51,8 @@
       .each(function(c) {
         if (c.APU_expand) {
           c[updateSymbol] = {
-            start: c.Tasks_start ? new Date(c.Tasks_start) : c.Tasks_start,
-            end: c.Tasks_end ? new Date(c.Tasks_end) : c.Tasks_end
+            Tasks_start: c.Tasks_start ? new Date(c.Tasks_start) : c.Tasks_start,
+            Tasks_end: c.Tasks_end ? new Date(c.Tasks_end) : c.Tasks_end
           };
           [c.Tasks_start, c.Tasks_end] = [null, null];
         }
@@ -89,7 +91,7 @@
           }
           d3.select(this)
             .select('g')
-              .attr('transform', `translate(${x(c.Tasks_start)}, 0)`)
+              .attr('transform', `translate(${c.Tasks_start ? x(c.Tasks_start) : 0}, 0)`)
               .select('rect.bar')
                 .attr('width', x(c.Tasks_end) - x(c.Tasks_start));
         }
@@ -176,7 +178,7 @@ function doselect(row) {
       tooltip.transition()
         .duration(200)
         .style("opacity", .9);
-      tooltip.html(`${d.APU_id}<br>${d.APU_description}`)
+      tooltip.html(`${d.Tasks_start}, ${d.Tasks_end}<br>${d.APU_id}<br>${d.APU_description}`)
         .style("left", (d3.event.pageX) + "px")
         .style("top", (d3.event.pageY - 30) + "px");
     })
@@ -226,7 +228,10 @@ function calculateClass(d) {
 }
 function calculateWidth(d) {
   if (d.APU_expand) {
-    return 0
+    return 0;
+  }
+  if (!d.Tasks_start || !d.Tasks_end) {
+    return 0;
   }
   d.APU_id.match(/\d+[.]{0,1}/g).reduce((acc, c, i, arr) => {
     if (arr.length == i + 1) {
