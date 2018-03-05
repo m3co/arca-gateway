@@ -39,6 +39,8 @@
                 c.Tasks_start = new Date(c.Tasks_start.valueOf() + dstart);
                 c.Tasks_end = new Date(c.Tasks_end.valueOf() + dstart);
                 gantt.update(c);
+                c.Tasks_start = null;
+                c.Tasks_end = null;
               }
             })
             .select('g')
