@@ -15,7 +15,7 @@
       client.emit('data', {
         query: 'get-edges',
         module: 'viewAPUTasks',
-        project: 3
+        project: 2
       });
     }
   });
@@ -40,7 +40,7 @@
       client.emit('data', {
         query: 'select',
         module: 'viewAPUTasks',
-        project: 3
+        project: 2
       });
     }
     if (data.query == 'select') {
