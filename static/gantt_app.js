@@ -14,6 +14,8 @@
   var svgWidth;
   var svgHeight;
   var h = 24;
+  var xaxisHeight = 22;
+  var padh = 4;
 
   var tempSymbol = Symbol();
   var updateSymbol = Symbol();
@@ -100,6 +102,7 @@
       });
   }
 function init(edges) {
+  d3.select('svg').attr('height', edges.count * (h + (2 * padh)));
   svgWidth = document.querySelector('svg').getAttribute('width');
   svgHeight = document.querySelector('svg').getAttribute('height');
   // set the ranges
@@ -149,11 +152,9 @@ function doselect(row) {
   var tasks = gantt.tasks;
   var COLORS = gantt.COLORS;
   var tooltip = d3.select("body div.tooltip");
-  var xaxisHeight = 22;
 
   var tasksHeight = svgHeight - xaxisHeight;
 
-  var padh = 4;
   var a = d3.select('svg g#tasks')
     .attr('transform', `translate(0, ${xaxisHeight})`)
     .selectAll('g.row').data(tasks);
@@ -257,7 +258,8 @@ function calculateWidth(d) {
           }
         }
         if (c.Tasks_end && c.Tasks_start) {
-          return x(c.Tasks_end) - x(c.Tasks_start);
+          var p = x(c.Tasks_end) - x(c.Tasks_start);
+          return p > 0 ? p : 0;
         }
         return 0;
       });
@@ -268,7 +270,8 @@ function calculateWidth(d) {
     return acc;
   }, '');
   if (d.Tasks_end && d.Tasks_start) {
-    return x(d.Tasks_end) - x(d.Tasks_start);
+    var p = x(d.Tasks_end) - x(d.Tasks_start);
+    return p > 0 ? p : 0;
   }
   return 0;
 }
