@@ -102,7 +102,9 @@
       });
   }
 function init(edges) {
-  d3.select('svg').attr('height', edges.count * (h + (2 * padh)));
+  d3.select('svg')
+    .attr('height', edges.count * (h + (2 * padh)))
+    .attr('width', window.innerWidth - 26);
   svgWidth = document.querySelector('svg').getAttribute('width');
   svgHeight = document.querySelector('svg').getAttribute('height');
   // set the ranges
@@ -182,8 +184,8 @@ function doselect(row) {
         .duration(200)
         .style("opacity", .9);
       tooltip.html(`
-        Desde:${d.Tasks_start.toLocaleDateString()}<br>
-        Hasta:${d.Tasks_end.toLocaleDateString()}<br>
+        Desde:${d.Tasks_start ? d.Tasks_start.toLocaleDateString() : ''}<br>
+        Hasta:${d.Tasks_end ? d.Tasks_end.toLocaleDateString() : ''}<br>
         ${d.APU_id}${d.Tasks_constrain ? `::${d.Tasks_constrain}` : ''}<br>
         ${d.APU_description}`)
         .style("left", (d3.event.pageX) + "px")
@@ -218,7 +220,7 @@ function doselect(row) {
   g.append('text')
     .attr('fill', 'white')
     .attr('y', h - padh)
-    .text(d => d.APU_id);
+    .text(d => `${d.APU_id}${d.Tasks_constrain ? `::${d.Tasks_constrain}` : ''}`);
 }
 
 function calculateClass(d) {
