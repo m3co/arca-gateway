@@ -181,7 +181,11 @@ function doselect(row) {
       tooltip.transition()
         .duration(200)
         .style("opacity", .9);
-      tooltip.html(`${d.Tasks_start}, ${d.Tasks_end}<br>${d.APU_id}<br>${d.APU_description}`)
+      tooltip.html(`
+        Desde:${d.Tasks_start.toLocaleDateString()}<br>
+        Hasta:${d.Tasks_end.toLocaleDateString()}<br>
+        ${d.APU_id}${d.Tasks_constrain ? `::${d.Tasks_constrain}` : ''}<br>
+        ${d.APU_description}`)
         .style("left", (d3.event.pageX) + "px")
         .style("top", (d3.event.pageY - 30) + "px");
     })
