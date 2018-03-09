@@ -61,4 +61,4 @@ io.on('connection', client => {
   });
 });
 
-io.listen(9000);
+io.listen(Number(config.port));
