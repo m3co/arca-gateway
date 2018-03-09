@@ -15,7 +15,7 @@ function connectToArca(client) {
     // FLUSH THE TRANSMISSION OF THIS STRING
   }
 
-  arca.connect(arca.port, arca.host, () => {
+  arca.connect(Number(config.arca.port), config.arca.host, () => {
     console.log('connected to ARCA');
   });
 
