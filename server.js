@@ -1,6 +1,10 @@
 'use strict';
-var net = require('net');
-var io = require('socket.io')();
+const fs = require('fs');
+const Ini = require('ini');
+const net = require('net');
+const io = require('socket.io')();
+const config = Ini.parse(fs.readFileSync('./config.ini', 'utf-8'));
+console.log(config);
 
 function connectToArca(client) {
   var arca = new net.Socket();
@@ -12,7 +16,7 @@ function connectToArca(client) {
     // FLUSH THE TRANSMISSION OF THIS STRING
   }
 
-  arca.connect(12345, 'localhost', () => {
+  arca.connect(arca.port, arca.host, () => {
     console.log('connected to ARCA');
   });
 
