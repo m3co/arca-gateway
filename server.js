@@ -4,7 +4,6 @@ const Ini = require('ini');
 const net = require('net');
 const io = require('socket.io')();
 const config = Ini.parse(fs.readFileSync('./config.ini', 'utf-8'));
-console.log(config);
 
 function connectToArca(client) {
   var arca = new net.Socket();
