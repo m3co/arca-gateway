@@ -19,6 +19,7 @@ function connectToArca(client) {
     console.log('connected to ARCA');
   });
 
+  var lasterror = '';
   arca.on('data', data => {
     var str = data.toString();
     if (str.length > 0) {
@@ -26,10 +27,11 @@ function connectToArca(client) {
         if (s.length > 0) {
           var msg;
           try {
-            msg = JSON.parse(s);
+            msg = JSON.parse(lasterror + s);
+            lasterror = '';
           } catch(e) {
-            console.log(`something went wrong with JSON.parse ${s}`);
-            console.log(e);
+            console.log(`something went wrong with JSON.parse ${lasterror + s}`);
+            lasterror = lasterror + s;
             return;
           }
           if (msg.action == 'check-conn') return;
