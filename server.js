@@ -34,7 +34,6 @@ function connectToArca(client) {
             lasterror = lasterror + s;
             return;
           }
-          if (msg.action == 'check-conn') return;
           client.emit('response', msg);
         }
       });
