@@ -16,23 +16,38 @@ const Subscriptions = {
   Sources: {},
 };
 
+arca.setEncoding('utf-8');
+
 arca.on('error', (data) => {
   // The following line is a good log candidate
   // console.log(`Error: ${data}`)
 });
 
+let lastData = '';
 arca.on('data', (data) => {
   let msg;
-  let ID;
-  if (data.toString().length > 0) {
+  if (data.length > 0) {
     try {
-      msg = JSON.parse(data.toString());
+      msg = JSON.parse(data);
     } catch(e) {
       // The following line is a good log candidate
-      // console.log(`Parsing error: ${e}, data: ${data.toString()}`);
+      // console.log(`Parsing error: ${e}, data: ${data}`);
+      lastData = lastData + data;
+      try {
+        msg = JSON.parse(lastData);
+      } catch(e) {
+        // The following line is a good log candidate
+        // console.log(`Parsing error: ${e}, data: ${data}`);
+      }
     }
   }
+  processMessage(msg);
+});
+
+function processMessage(msg) {
+  let ID;
   if (msg) {
+    lastData = '';
     if (msg.Data && msg.Data.ID) {
       ID = msg.Data.ID;
     } else {
@@ -49,7 +64,7 @@ arca.on('data', (data) => {
       });
     }
   }
-});
+}
 
 arca.on('close', () => {
   setTimeout(() => {
