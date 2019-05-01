@@ -25,23 +25,36 @@ arca.on('error', (data) => {
 
 let lastData = '';
 arca.on('data', (data) => {
-  let msg;
   if (data.length > 0) {
+    const rows = data.split('\n')
+    if (rows.length > 1) {
+      rows.forEach(data => {
+        try {
+          let msg = JSON.parse(data);
+          processMessage(msg);
+        } catch(e) {
+          // The following line is a good log candidate
+          // console.log(`Parsing error: ${e}, data: ${data}`);
+        }
+      });
+      return;
+    }
     try {
-      msg = JSON.parse(data);
+      let msg = JSON.parse(data);
+      processMessage(msg);
     } catch(e) {
       // The following line is a good log candidate
       // console.log(`Parsing error: ${e}, data: ${data}`);
       lastData = lastData + data;
       try {
-        msg = JSON.parse(lastData);
+        let msg = JSON.parse(lastData);
+        processMessage(msg);
       } catch(e) {
         // The following line is a good log candidate
         // console.log(`Parsing error: ${e}, data: ${data}`);
       }
     }
   }
-  processMessage(msg);
 });
 
 function processMessage(msg) {
