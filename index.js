@@ -73,7 +73,12 @@ function processMessage(msg) {
     } else {
       // The following line is a good log candidate
       Object.keys(sockets).forEach(id => {
-        sockets[id].emit('jsonrpc', msg);
+        const ch = Subscriptions.Targets[msg.Context.Target];
+        if (ch) {
+          if (ch[id]) {
+            ch[id].emit('jsonrpc', msg);
+          };
+        }
       });
     }
   }
