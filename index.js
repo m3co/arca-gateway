@@ -72,14 +72,10 @@ function processMessage(msg) {
       delete IDs[ID];
     } else {
       // The following line is a good log candidate
-      Object.keys(sockets).forEach(id => {
-        const ch = Subscriptions.Targets[msg.Context.Target];
-        if (ch) {
-          if (ch[id]) {
-            ch[id].emit('jsonrpc', msg);
-          };
-        }
-      });
+      const ch = Subscriptions.Targets[msg.Context.Target];
+      ch && Object.keys(sockets).forEach(id =>
+        ch[id] && ch[id].emit('jsonrpc', msg)
+      );
     }
   }
 }
