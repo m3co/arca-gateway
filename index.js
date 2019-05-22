@@ -35,6 +35,14 @@ arca.on('data', (data) => {
         } catch(e) {
           // The following line is a good log candidate
           // console.log(`Parsing error: ${e}, data: ${data}`);
+          lastData = lastData + data;
+          try {
+            let msg = JSON.parse(lastData);
+            processMessage(msg);
+          } catch(e) {
+            // The following line is a good log candidate
+            // console.log(`Parsing error: ${e}, data: ${data}`);
+          }
         }
       });
       return;
