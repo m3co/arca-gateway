@@ -24,6 +24,17 @@ arca.on('error', (data) => {
 });
 
 let lastData = '';
+function recorverAndProcess(data) {
+  lastData = lastData + data;
+  try {
+    let msg = JSON.parse(lastData);
+    processMessage(msg);
+  } catch(e) {
+    // The following line is a good log candidate
+    // console.log(`Parsing error: ${e}, data: ${data}`);
+  }
+}
+
 arca.on('data', (data) => {
   if (data.length > 0) {
     const rows = data.split('\n')
@@ -35,14 +46,7 @@ arca.on('data', (data) => {
         } catch(e) {
           // The following line is a good log candidate
           // console.log(`Parsing error: ${e}, data: ${data}`);
-          lastData = lastData + data;
-          try {
-            let msg = JSON.parse(lastData);
-            processMessage(msg);
-          } catch(e) {
-            // The following line is a good log candidate
-            // console.log(`Parsing error: ${e}, data: ${data}`);
-          }
+          recorverAndProcess(data);
         }
       });
       return;
@@ -53,14 +57,7 @@ arca.on('data', (data) => {
     } catch(e) {
       // The following line is a good log candidate
       // console.log(`Parsing error: ${e}, data: ${data}`);
-      lastData = lastData + data;
-      try {
-        let msg = JSON.parse(lastData);
-        processMessage(msg);
-      } catch(e) {
-        // The following line is a good log candidate
-        // console.log(`Parsing error: ${e}, data: ${data}`);
-      }
+      recorverAndProcess(data);
     }
   }
 });
