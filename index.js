@@ -18,7 +18,7 @@ const Subscriptions = {
 const FACADIDs = {};
 
 let lastFACADData = '';
-function recorverAndProcessFACAD(data, socket) {
+function recoverAndProcessFACAD(data, socket) {
   lastFACADData = lastFACADData + data.toString();
   try {
     let msg = JSON.parse(lastFACADData);
@@ -37,10 +37,10 @@ const facad = new net.createServer((socket) => {
       const rows = data.toString().split('\n').filter((str) => str.length > 0);
       if (rows.length > 1) {
         rows.forEach(data => {
-          recorverAndProcessFACAD(data, socket);
+          recoverAndProcessFACAD(data, socket);
         });
       } else {
-        recorverAndProcessFACAD(data, socket);
+        recoverAndProcessFACAD(data, socket);
       }
     }
   });
