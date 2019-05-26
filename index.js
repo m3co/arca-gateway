@@ -15,6 +15,31 @@ const Subscriptions = {
   Targets: {},
   Sources: {},
 };
+const FACADIDs = {};
+
+const facad = new net.createServer((socket) => {
+  socket.on('connect', () => {
+    console.log('connected');
+  });
+
+  socket.on('data', (data) => {
+    const msg = JSON.parse(data.toString());
+    FACADIDs[msg.ID] = socket;
+    arca.write(JSON.stringify(msg) + '\n');
+  });
+
+  socket.on('error', (err) => {
+    console.log('error', err);
+  });
+
+  socket.on('close', (err) => {
+    Object.keys(FACADIDs).forEach((ID) => {
+      if (FACADIDs[ID] == socket) {
+        delete FACADIDs[ID];
+      }
+    });
+  });
+});
 
 arca.setEncoding('utf-8');
 
@@ -73,8 +98,14 @@ function processMessage(msg) {
     }
     if (ID) {
       // The following line is a good log candidate
-      IDs[ID].socket.emit('jsonrpc', msg);
-      delete IDs[ID];
+      if (IDs[ID]) {
+        IDs[ID].socket.emit('jsonrpc', msg);
+        delete IDs[ID];
+      }
+      if (FACADIDs[ID]) {
+        FACADIDs[ID].write(JSON.stringify(msg) + '\n');
+        delete FACADIDs[ID];
+      }
     } else {
       // The following line is a good log candidate
       const ch = Subscriptions.Targets[msg.Context.Target];
@@ -190,6 +221,7 @@ io.on('connect', (socket) => {
 
 // Here we put bind all the params with config
 arca.connect(config.arca.port, config.arca.host);
+facad.listen(config.facad.port);
 proxy.listen(config.port);
 function handler (req, res) {
   staticProxy.web(req, res, { target: config.static.target })
