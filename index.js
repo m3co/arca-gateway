@@ -17,22 +17,35 @@ const Subscriptions = {
 };
 const FACADIDs = {};
 
-const facad = new net.createServer((socket) => {
-  socket.on('connect', () => {
-    console.log('connected');
-  });
-
-  socket.on('data', (data) => {
-    const msg = JSON.parse(data.toString());
+let lastFACADData = '';
+function recorverAndProcessFACAD(data, socket) {
+  lastFACADData = lastFACADData + data.toString();
+  try {
+    let msg = JSON.parse(lastFACADData);
     FACADIDs[msg.ID] = socket;
     arca.write(JSON.stringify(msg) + '\n');
+    lastFACADData = '';
+  } catch(e) {
+    // The following line is a good log candidate
+    // console.log(`Parsing error: ${e}, data: ${data}`);
+  }
+}
+
+const facad = new net.createServer((socket) => {
+  socket.on('data', (data) => {
+    if (data.length > 0) {
+      const rows = data.toString().split('\n').filter((str) => str.length > 0);
+      if (rows.length > 1) {
+        rows.forEach(data => {
+          recorverAndProcessFACAD(data, socket);
+        });
+      } else {
+        recorverAndProcessFACAD(data, socket);
+      }
+    }
   });
 
-  socket.on('error', (err) => {
-    console.log('error', err);
-  });
-
-  socket.on('close', (err) => {
+  socket.on('close', () => {
     Object.keys(FACADIDs).forEach((ID) => {
       if (FACADIDs[ID] == socket) {
         delete FACADIDs[ID];
@@ -62,7 +75,7 @@ function recorverAndProcess(data) {
 
 arca.on('data', (data) => {
   if (data.length > 0) {
-    const rows = data.split('\n')
+    const rows = data.split('\n').filter((str) => str.length > 0);
     if (rows.length > 1) {
       rows.forEach(data => {
         try {
@@ -90,7 +103,6 @@ arca.on('data', (data) => {
 function processMessage(msg) {
   let ID;
   if (msg) {
-    lastData = '';
     if (msg.Data && msg.Data.ID) {
       ID = msg.Data.ID;
     } else {
@@ -99,6 +111,7 @@ function processMessage(msg) {
     if (ID) {
       // The following line is a good log candidate
       if (IDs[ID]) {
+        lastData = '';
         IDs[ID].socket.emit('jsonrpc', msg);
         delete IDs[ID];
       }
