@@ -156,6 +156,9 @@ function subscribe(data, socket) {
       socket.emit('jsonrpc', {
         ID: data.ID,
         Method: data.Method,
+        Context: {
+          Target: data.Params.Target
+        },
         Result: "Success",
       });
       return;
@@ -167,6 +170,9 @@ function subscribe(data, socket) {
       socket.emit('jsonrpc', {
         ID: data.ID,
         Method: data.Method,
+        Context: {
+          Source: data.Params.Source
+        },
         Result: "Success",
       });
       return;
