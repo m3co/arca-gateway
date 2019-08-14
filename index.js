@@ -2,6 +2,8 @@
 const fs = require('fs');
 const ini = require('ini');
 const config = ini.parse(fs.readFileSync('./config.ini', 'utf-8'));
+const bunyan = require('bunyan');
+const log = bunyan.createLogger({ name: "arca-gateway" });
 
 const proxy = require('http').createServer(handler)
 const staticProxy = require('http-proxy').createProxyServer({});
@@ -19,6 +21,7 @@ const FACADIDs = {};
 
 let lastFACADData = '';
 function recoverAndProcessFACAD(data, socket) {
+  const beforeData = lastFACADData.toString();
   lastFACADData = lastFACADData + data.toString();
   try {
     let msg = JSON.parse(lastFACADData);
@@ -27,7 +30,12 @@ function recoverAndProcessFACAD(data, socket) {
     lastFACADData = '';
   } catch(e) {
     // The following line is a good log candidate
-    // console.log(`Parsing error: ${e}, data: ${data}`);
+    log.error({
+      source: 'recoverAndProcessFACAD',
+      error: e,
+      data,
+      lastData: beforeData
+    });
   }
 }
 
@@ -58,18 +66,24 @@ arca.setEncoding('utf-8');
 
 arca.on('error', (data) => {
   // The following line is a good log candidate
-  // console.log(`Error: ${data}`)
+  log.error(`Error: ${data}`)
 });
 
 let lastData = '';
 function recorverAndProcess(data) {
+  const beforeData = lastData.toString();
   lastData = lastData + data;
   try {
     let msg = JSON.parse(lastData);
     processMessage(msg);
   } catch(e) {
     // The following line is a good log candidate
-    // console.log(`Parsing error: ${e}, data: ${data}`);
+    log.error({
+      source: 'recorverAndProcess',
+      error: e,
+      data,
+      lastData: beforeData
+    });
   }
 }
 
@@ -133,16 +147,16 @@ arca.on('close', () => {
   setTimeout(() => {
     if (arca.writable) {
       // The following line is a good log candidate
-      // console.log('reconnected');
+      log.info('reconnected to arca');
     } else {
       // The following line is a good log candidate
-      // console.log('reconnecting');
+      log.info('reconnecting with arca');
       arca.connect(config.arca.port, config.arca.host);
     }
   }, 1000)
 
   // The following line is a good log candidate
-	// console.log('Connection closed');
+	log.info('connection to arca closed');
 });
 
 function subscribe(data, socket) {
@@ -212,8 +226,10 @@ function unsubscribe(socket) {
 
 io.on('connect', (socket) => {
   sockets[socket.id] = socket;
+  log.info('connect');
 
   socket.on('jsonrpc', (data) => {
+    log.info('jsonrpc', data);
     if (arca.writable) {
       IDs[data.ID] = {
         socket,
@@ -232,6 +248,7 @@ io.on('connect', (socket) => {
   });
 
   socket.on('disconnect', () => {
+    log.info('disconnect');
     unsubscribe(socket);
     // The following line is a good log candidate
     delete sockets[socket.id];
