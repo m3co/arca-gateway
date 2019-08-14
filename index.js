@@ -3,7 +3,12 @@ const fs = require('fs');
 const ini = require('ini');
 const config = ini.parse(fs.readFileSync('./config.ini', 'utf-8'));
 const bunyan = require('bunyan');
-const log = bunyan.createLogger({ name: "arca-gateway" });
+const log = bunyan.createLogger({
+  name: 'arca-gateway',
+  streams: [{
+      path: './arca-gateway.log',
+  }]
+});
 
 const proxy = require('http').createServer(handler)
 const staticProxy = require('http-proxy').createProxyServer({});

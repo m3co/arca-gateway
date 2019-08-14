@@ -4,7 +4,8 @@
   "description": "Example of the socket IO proxy",
   "main": "index.js",
   "scripts": {
-    "server": "node index.js | bunyan",
+    "server": "node index.js",
+    "show": "tail -f arca-gateway.log | bunyan",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Andres Rios <rianby64@gmail.com>",
