@@ -1,3 +1,0 @@
-# ARCA Proxy (nodeJS)
-
-Lo que me interesa de este proxy es que nodeJS tiene una biblioteca excelentisima llamada Socket.io y, bueno...
