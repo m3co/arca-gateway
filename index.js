@@ -265,5 +265,7 @@ arca.connect(config.arca.port, config.arca.host);
 facad.listen(config.facad.port, config.facad.host);
 proxy.listen(config.port);
 function handler (req, res) {
-  staticProxy.web(req, res, { target: config.static.target })
+  staticProxy.web(req, res, { target: config.static.target }, (err) => {
+    log.error(err);
+  });
 }
