@@ -4,6 +4,7 @@ import { Socket } from 'net';
 import { parse } from 'ini';
 
 export const config = parse(readFileSync('config.ini', 'utf-8'));
+config.arca.retryToConnectTimeout = 1000;
 
 export interface Response {
     ID: string;
@@ -20,4 +21,21 @@ export interface Response {
 }
 
 export const arca = new Socket();
-arca.setEncoding('utf-8');
+
+void function() {
+    arca.setEncoding('utf-8');
+    config.arca.retryTimer = null;
+
+    arca.on('error', (err: NodeJS.ErrnoException) => {
+        if (err.code === 'ECONNREFUSED' || err.code === 'ECONNRESET') {
+            config.arca.retryToConnectTimeoutID = setTimeout(() => {
+                //console.log('retrying to connect...');
+                if (config.arca.port && config.arca.host) {
+                    arca.connect(config.arca.port, config.arca.host);
+                }
+            }, config.arca.retryToConnectTimeout);
+            return;
+        }
+    });
+
+}();
