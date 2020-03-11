@@ -1,8 +1,10 @@
 
-import { config, arca, Response } from './index';
+import { Response } from './index';
 import { v4 as uuidv4 } from 'uuid';
 
 test('Reconnect', async (done: jest.DoneCallback) => {
+    const { config, arca } = await import('./index');
+
     let i = 0;
     const id = uuidv4();
 
