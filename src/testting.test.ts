@@ -3,8 +3,12 @@ import { Response } from './index';
 import { v4 as uuidv4 } from 'uuid';
 
 test('Reconnect', async (done: jest.DoneCallback) => {
-    const { config, arca } = await import('./index');
+    const { config, createInstance } = await import('./index');
+    config.arca.host = 'localhost';
+    config.arca.port = 22345;
+    const arca = createInstance();
 
+    config.arca.port = 1;
     let i = 0;
     const id = uuidv4();
 
@@ -24,7 +28,6 @@ test('Reconnect', async (done: jest.DoneCallback) => {
             }
         });
 
-        config.arca.port = 1;
         arca.connect(config.arca.port, config.arca.host);
     });
     try {
@@ -36,25 +39,36 @@ test('Reconnect', async (done: jest.DoneCallback) => {
     }
 });
 
-/*
-arca.on('data', (data: Buffer) => {
-    const result = JSON.parse(data.toString()) as Response;
-    resolve(result);
-    arca.end();
-});
+test('Send a first simple request', async (done: jest.DoneCallback) => {
+    const { config, createInstance } = await import('./index');
+    config.arca.host = 'localhost';
+    config.arca.port = 22345;
+    const arca = createInstance();
 
-arca.on('connect', (had_error: boolean): void => {
-    if (had_error) {
-        reject(new Error('Error when connecting'));
-        return;
-    }
-    const request = {
-        ID: id,
-        Method: 'test',
-        Context: {
-            Source: 'test-source'
+    const id = uuidv4();
+
+    arca.on('error', (err: Error) => {
+        throw err;
+    });
+
+    arca.on('data', (data: Buffer) => {
+        const result = JSON.parse(data.toString()) as Response;
+        expect(result.ID).toBe(id);
+        arca.end();
+        done();
+    });
+
+    arca.connect({
+        port: config.arca.port,
+        host: config.arca.host,
+    }, () => {
+        const request = {
+            ID: id,
+            Method: 'test',
+            Context: {
+                Source: 'test-source'
+            }
         }
-    }
-    arca.write(`${JSON.stringify(request)}\n`);
+        arca.write(`${JSON.stringify(request)}\n`);
+    });
 });
-*/
