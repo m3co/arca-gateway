@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"regexp"
 	"time"
 
 	"net"
@@ -10,6 +11,13 @@ import (
 	dbbus "github.com/m3co/arca-dbbus"
 	jsonrpc "github.com/m3co/arca-jsonrpc"
 )
+
+// Request is what comes from the client
+type Request struct {
+	ID      string
+	Method  string
+	Context interface{}
+}
 
 // Handles incoming requests.
 func handleRequest(conn net.Conn) {
@@ -26,25 +34,57 @@ func handleRequest(conn net.Conn) {
 	responseMsg, _ := json.Marshal(response)
 
 	buf := make([]byte, 1024)
-	// Read the incoming connection into the buffer.
 	_, err := conn.Read(buf)
 	if err != nil {
 		fmt.Println("Error reading:", err.Error())
 		return
 	}
 
-	// Send a response back to person contacting us.
-	firstHalfMsg := responseMsg[:100]
-	lastHalfMsg := responseMsg[100:]
+	r, _ := regexp.Compile("({.+})")
+	msgFromClient := string(buf)
+	msgToJSON := r.FindString(msgFromClient)
 
-	fmt.Println(string(firstHalfMsg))
-	conn.Write(firstHalfMsg)
+	request := &Request{}
+	if err := json.Unmarshal([]byte(msgToJSON), request); err != nil {
+		fmt.Printf("error %v with buff --%s--\n", err, msgToJSON)
+		return
+	}
+	fmt.Println(request, "received from client")
 
-	fmt.Println("waiting...")
-	time.Sleep(100 * time.Millisecond)
+	if request.Method == "msg-in-2-parts" {
+		first := responseMsg[:100]
+		last := responseMsg[100:]
 
-	fmt.Println(string(lastHalfMsg))
-	conn.Write(lastHalfMsg)
+		fmt.Println(string(first))
+		conn.Write(first)
+
+		fmt.Println("waiting...")
+		time.Sleep(100 * time.Millisecond)
+
+		fmt.Println(string(last))
+		conn.Write(last)
+	}
+
+	if request.Method == "msg-in-3-parts" {
+		first := responseMsg[:50]
+		second := responseMsg[50:100]
+		last := responseMsg[100:]
+
+		fmt.Println(string(first))
+		conn.Write(first)
+
+		fmt.Println("waiting...")
+		time.Sleep(100 * time.Millisecond)
+
+		fmt.Println(string(second))
+		conn.Write(second)
+
+		fmt.Println("waiting...")
+		time.Sleep(100 * time.Millisecond)
+
+		fmt.Println(string(last))
+		conn.Write(last)
+	}
 
 	conn.Write(([]byte("\n")))
 	// Close the connection when you're done with it.

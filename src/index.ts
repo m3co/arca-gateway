@@ -95,7 +95,15 @@ export class Arca {
                             const result = JSON.parse(extraMsg) as Response;
                             resolve(result);
                         } catch(err) {
-                            console.log('gosh! this is too deep', err);
+                            arca.once('data', (extraExtraData: Buffer) => {
+                                const extraExtraMsg = `${extraMsg}${extraExtraData.toString()}`;
+                                try {
+                                    const result = JSON.parse(extraExtraMsg) as Response;
+                                    resolve(result);
+                                } catch(err) {
+                                    console.log('gosh! this is too deep', err);
+                                }
+                            });
                         }
                     });
                 }

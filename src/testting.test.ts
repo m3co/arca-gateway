@@ -77,3 +77,26 @@ test('A request in two parts', async () => {
         fail(err);
     }
 });
+
+test('A request in three parts', async () => {
+    try {
+        const arca = new Arca();
+        arca.config.arca.port = '22346'
+
+        const id = 'id-of-error';
+        await arca.connect();
+
+        const request = {
+            ID: id,
+            Method: 'msg-in-3-parts',
+            Context: {
+                Source: 'test-source'
+            }
+        }
+
+        const response = await arca.request(request);
+        expect(response.ID).toBe(id);
+    } catch(err) {
+        fail(err);
+    }
+});
