@@ -1,67 +1,13 @@
 
-import { Response } from './index';
+import { Arca } from './index';
 import { v4 as uuidv4 } from 'uuid';
 
-test('Reconnect', async (done: jest.DoneCallback) => {
-    const { config, createInstance } = await import('./index');
-    config.arca.host = 'localhost';
-    config.arca.port = 22345;
-    const arca = createInstance();
-
-    config.arca.port = 1;
-    let i = 0;
-    const id = uuidv4();
-
-    const promise = new Promise<Response>((
-        resolve: (value: Response | PromiseLike<Response>) => void,
-        reject: (reason: Error) => void
-    ) => {
-        arca.on('error', (error: Error) => {
-            reject(error);
-            i++;
-            if (i == 2) {
-                expect(config.arca.retryToConnectTimeoutID).toBeDefined();
-                clearTimeout(config.arca.retryToConnectTimeoutID);
-                done();
-            } else if (i > 2) {
-                fail(new Error('Unexpected execution'));
-            }
-        });
-
-        arca.connect(config.arca.port, config.arca.host);
-    });
+test('Send a first simple request', async () => {
     try {
-        await promise;
-        fail(new Error('Unexpected execution'));
-    } catch(e) {
-        const err = e as NodeJS.ErrnoException;
-        expect(err.code).toBe('ECONNREFUSED');
-    }
-});
+        const arca = new Arca();
+        const id = uuidv4();
+        await arca.connect();
 
-test('Send a first simple request', async (done: jest.DoneCallback) => {
-    const { config, createInstance } = await import('./index');
-    config.arca.host = 'localhost';
-    config.arca.port = 22345;
-    const arca = createInstance();
-
-    const id = uuidv4();
-
-    arca.on('error', (err: Error) => {
-        throw err;
-    });
-
-    arca.on('data', (data: Buffer) => {
-        const result = JSON.parse(data.toString()) as Response;
-        expect(result.ID).toBe(id);
-        arca.end();
-        done();
-    });
-
-    arca.connect({
-        port: config.arca.port,
-        host: config.arca.host,
-    }, () => {
         const request = {
             ID: id,
             Method: 'test',
@@ -69,6 +15,42 @@ test('Send a first simple request', async (done: jest.DoneCallback) => {
                 Source: 'test-source'
             }
         }
-        arca.write(`${JSON.stringify(request)}\n`);
-    });
+
+        const response = await arca.request(request);
+        expect(response.ID).toBe(id);
+
+    } catch(err) {
+        fail(err);
+    }
+});
+
+test('Send a second simple request', async () => {
+    const arca = new Arca();
+    const oldPort = arca.config.arca.port;
+    arca.config.arca.port = '0';
+
+    try {
+        await arca.connect(100);
+    } catch(err) {
+        arca.config.arca.port = oldPort;
+        await new Promise<void>((resolve, reject) => {
+            setTimeout(async() => {
+                const id = uuidv4();
+                const request = {
+                    ID: id,
+                    Method: 'test',
+                    Context: {
+                        Source: 'test-source'
+                    }
+                }
+                try {
+                    const response = await arca.request(request);
+                    expect(response.ID).toBe(id);
+                    resolve();
+                } catch(err) {
+                    reject(err);
+                }
+            }, 300); // after 300ms, let's try to send a request
+        });
+    }
 });
