@@ -24,7 +24,7 @@ test('Send a first simple request', async () => {
     }
 });
 
-test('Send a second simple request', async () => {
+test('Reconnect and process the request', async () => {
     const arca = new Arca();
     const oldPort = arca.config.arca.port;
     arca.config.arca.port = '0';
@@ -52,5 +52,28 @@ test('Send a second simple request', async () => {
                 }
             }, 300); // after 300ms, let's try to send a request
         });
+    }
+});
+
+test('A request in two parts', async () => {
+    try {
+        const arca = new Arca();
+        arca.config.arca.port = '22346'
+
+        const id = 'id-of-error';
+        await arca.connect();
+
+        const request = {
+            ID: id,
+            Method: 'msg-in-2-parts',
+            Context: {
+                Source: 'test-source'
+            }
+        }
+
+        const response = await arca.request(request);
+        expect(response.ID).toBe(id);
+    } catch(err) {
+        fail(err);
     }
 });

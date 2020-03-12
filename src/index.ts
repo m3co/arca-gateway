@@ -14,7 +14,7 @@ export interface Response {
     Error: {
         Code: number;
         Message: string;
-    }
+    } | null
 }
 
 export interface Request {
@@ -37,9 +37,7 @@ export class Arca {
     constructor(configLocation: string = 'config.ini') {
         const config = parse(readFileSync(configLocation, 'utf-8'));
         const arca = new Socket();
-
         arca.setEncoding('utf-8');
-
 
         this.arca = arca;
         this.config = config;
@@ -85,11 +83,26 @@ export class Arca {
             resolve: (value: Response | PromiseLike<Response>) => void,
             reject: (reason: NodeJS.ErrnoException) => void,
         ) => {
+            const processMsgs = (data: Buffer) => {
+                const msg = data.toString();
+                try {
+                    const result = JSON.parse(msg) as Response;
+                    resolve(result);
+                } catch(err) {
+                    arca.once('data', (extraData: Buffer) => {
+                        const extraMsg = `${msg}${extraData.toString()}`;
+                        try {
+                            const result = JSON.parse(extraMsg) as Response;
+                            resolve(result);
+                        } catch(err) {
+                            console.log('gosh! this is too deep', err);
+                        }
+                    });
+                }
+            };
+
             arca.once('error', reject);
-            arca.once('data', (data: Buffer) => {
-                const result = JSON.parse(data.toString()) as Response;
-                resolve(result);
-            });
+            arca.once('data', processMsgs);
             arca.write(`${JSON.stringify(request)}\n`);
         });
     }

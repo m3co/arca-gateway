@@ -10,6 +10,6 @@ ADD ./arca-go-test/main.go .
 
 RUN go build main.go
 
-EXPOSE 22345
+EXPOSE 22346 22345
 
 CMD ["./main"]
