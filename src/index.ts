@@ -3,6 +3,10 @@ import { readFileSync } from 'fs';
 import { Socket } from 'net';
 import { parse } from 'ini';
 
+const ECONNRESET = 'ECONNRESET';
+const ECONNREFUSED = 'ECONNREFUSED';
+const errorUnexpectedEndJSONInput = 'Unexpected end of JSON input'.toLocaleLowerCase();
+
 export interface Response {
     ID: string;
     Context: {
@@ -53,7 +57,7 @@ export class Arca {
             reject: (reason: NodeJS.ErrnoException) => void
         ) => {
             arca.on('error', (err: NodeJS.ErrnoException) => {
-                if (err.code === 'ECONNREFUSED' || err.code === 'ECONNRESET') {
+                if (err.code === ECONNREFUSED || err.code === ECONNRESET) {
                     this.retryToConnectTimeoutID = setTimeout(() => {
                         arca.connect(Number(config.arca.port), config.arca.host);
                     }, retryToConnectTimeout);
@@ -85,21 +89,31 @@ export class Arca {
             resolve: (value: Response | PromiseLike<Response>) => void,
             reject: (reason: NodeJS.ErrnoException) => void,
         ) => {
+            const processRows = (msg: string) => {
+                const rows = msg.split('\n').filter((str) => str.length > 0);
+                rows.forEach((row: string) => {
+                    const response = JSON.parse(row) as Response;
+                    if (response.ID === ID) {
+                        resolve(response);
+                    } else {
+                        this.responseQueue.push(response); // still don't know it
+                    }
+                });
+            }
+
             const processMsg = (prevMsg: string = '') => {
                 arca.once('data', (data: Buffer) => {
                     const msg = `${prevMsg}${data.toString()}`;
-                    const rows = msg.split('\n').filter((str) => str.length > 0);
                     try {
-                        rows.forEach((row: string) => {
-                            const response = JSON.parse(row) as Response;
-                            if (response.ID === ID) {
-                                resolve(response);
-                            } else {
-                                this.responseQueue.push(response); // still don't know it
-                            }
-                        });
+                        processRows(msg)
                     } catch(err) {
-                        processMsg(msg);
+                        const error = err as Error;
+                        const errorMessage = error.message.toLocaleLowerCase();
+                        if (errorMessage === errorUnexpectedEndJSONInput) {
+                            processMsg(msg);
+                        } else {
+                            reject(error);
+                        }
                     }
                 });
             }
