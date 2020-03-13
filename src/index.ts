@@ -28,6 +28,7 @@ export interface Request {
 export class Arca {
     private arca: Socket;
     private retryToConnectTimeoutID: NodeJS.Timeout | null = null;
+    private responseQueue: Response[] = [];
     public config: {
         [key: string]: {
             [key: string]: string;
@@ -78,19 +79,25 @@ export class Arca {
     // send the request to Arca
     request(request: Request): Promise<Response> {
         const { arca } = this;
+        const { ID } = request;
 
         return new Promise<Response>((
             resolve: (value: Response | PromiseLike<Response>) => void,
             reject: (reason: NodeJS.ErrnoException) => void,
         ) => {
-            function processMsg(prevMsg: string = '') {
+            const processMsg = (prevMsg: string = '') => {
                 arca.once('data', (data: Buffer) => {
                     const msg = `${prevMsg}${data.toString()}`;
                     const rows = msg.split('\n').filter((str) => str.length > 0);
-                    console.log(rows);
                     try {
-                        const response = JSON.parse(msg) as Response;
-                        resolve(response);
+                        rows.forEach((row: string) => {
+                            const response = JSON.parse(row) as Response;
+                            if (response.ID === ID) {
+                                resolve(response);
+                            } else {
+                                this.responseQueue.push(response); // still don't know it
+                            }
+                        });
                     } catch(err) {
                         processMsg(msg);
                     }

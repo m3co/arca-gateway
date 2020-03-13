@@ -115,7 +115,10 @@ func handleRequest(conn net.Conn) {
 	}
 
 	if request.Method == "2-msg-in-1-parts" {
-		w := fmt.Sprintf("%s\n%s", string(responseMsg), string(responseMsg))
+
+		response.ID = "something else"
+		responseMsg2, _ := json.Marshal(response)
+		w := fmt.Sprintf("%s\n%s", string(responseMsg), string(responseMsg2))
 		fmt.Println(w, "esto son dos mensajes a la vez")
 		conn.Write([]byte(w))
 	}
