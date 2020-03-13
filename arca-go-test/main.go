@@ -114,6 +114,12 @@ func handleRequest(conn net.Conn) {
 		conn.Write(last)
 	}
 
+	if request.Method == "2-msg-in-1-parts" {
+		w := fmt.Sprintf("%s\n%s", string(responseMsg), string(responseMsg))
+		fmt.Println(w, "esto son dos mensajes a la vez")
+		conn.Write([]byte(w))
+	}
+
 	conn.Write(([]byte("\n")))
 	// Close the connection when you're done with it.
 	conn.Close()

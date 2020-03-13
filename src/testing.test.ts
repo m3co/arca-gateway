@@ -79,3 +79,27 @@ test('Reconnect and process the request', async () => {
         }
     });
 });
+
+
+test(`Two responses in 1 parts`, async () => {
+    try {
+        const arca = new Arca();
+        arca.config.arca.port = '22346'
+
+        const id = 'id-of-error';
+        await arca.connect();
+
+        const request = {
+            ID: id,
+            Method: `2-msg-in-1-parts`,
+            Context: {
+                Source: 'test-source'
+            }
+        }
+
+        const response = await arca.request(request);
+        expect(response.ID).toBe(id);
+    } catch(err) {
+        fail(err);
+    }
+});

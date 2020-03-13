@@ -83,9 +83,11 @@ export class Arca {
             resolve: (value: Response | PromiseLike<Response>) => void,
             reject: (reason: NodeJS.ErrnoException) => void,
         ) => {
-            function processMsg(prevMsg: string) {
+            function processMsg(prevMsg: string = '') {
                 arca.once('data', (data: Buffer) => {
                     const msg = `${prevMsg}${data.toString()}`;
+                    const rows = msg.split('\n').filter((str) => str.length > 0);
+                    console.log(rows);
                     try {
                         const response = JSON.parse(msg) as Response;
                         resolve(response);
@@ -96,7 +98,7 @@ export class Arca {
             }
 
             arca.once('error', reject);
-            processMsg('');
+            processMsg();
             arca.write(`${JSON.stringify(request)}\n`);
         });
     }
