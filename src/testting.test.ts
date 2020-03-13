@@ -55,7 +55,7 @@ test('Reconnect and process the request', async () => {
     }
 });
 
-test('A request in two parts', async () => {
+test('A response in two parts', async () => {
     try {
         const arca = new Arca();
         arca.config.arca.port = '22346'
@@ -78,7 +78,7 @@ test('A request in two parts', async () => {
     }
 });
 
-test('A request in three parts', async () => {
+test('A response in three parts', async () => {
     try {
         const arca = new Arca();
         arca.config.arca.port = '22346'
@@ -89,6 +89,29 @@ test('A request in three parts', async () => {
         const request = {
             ID: id,
             Method: 'msg-in-3-parts',
+            Context: {
+                Source: 'test-source'
+            }
+        }
+
+        const response = await arca.request(request);
+        expect(response.ID).toBe(id);
+    } catch(err) {
+        fail(err);
+    }
+});
+
+test('A response in four parts', async () => {
+    try {
+        const arca = new Arca();
+        arca.config.arca.port = '22346'
+
+        const id = 'id-of-error';
+        await arca.connect();
+
+        const request = {
+            ID: id,
+            Method: 'msg-in-4-parts',
             Context: {
                 Source: 'test-source'
             }

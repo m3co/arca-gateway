@@ -59,7 +59,7 @@ func handleRequest(conn net.Conn) {
 		conn.Write(first)
 
 		fmt.Println("waiting...")
-		time.Sleep(100 * time.Millisecond)
+		time.Sleep(200 * time.Millisecond)
 
 		fmt.Println(string(last))
 		conn.Write(last)
@@ -74,13 +74,41 @@ func handleRequest(conn net.Conn) {
 		conn.Write(first)
 
 		fmt.Println("waiting...")
-		time.Sleep(100 * time.Millisecond)
+		time.Sleep(200 * time.Millisecond)
 
 		fmt.Println(string(second))
 		conn.Write(second)
 
 		fmt.Println("waiting...")
-		time.Sleep(100 * time.Millisecond)
+		time.Sleep(200 * time.Millisecond)
+
+		fmt.Println(string(last))
+		conn.Write(last)
+	}
+
+	if request.Method == "msg-in-4-parts" {
+		first := responseMsg[:30]
+		second := responseMsg[30:60]
+		third := responseMsg[60:90]
+		last := responseMsg[90:]
+
+		fmt.Println(string(first))
+		conn.Write(first)
+
+		fmt.Println("waiting...")
+		time.Sleep(200 * time.Millisecond)
+
+		fmt.Println(string(second))
+		conn.Write(second)
+
+		fmt.Println("waiting...")
+		time.Sleep(200 * time.Millisecond)
+
+		fmt.Println(string(third))
+		conn.Write(third)
+
+		fmt.Println("waiting...")
+		time.Sleep(200 * time.Millisecond)
 
 		fmt.Println(string(last))
 		conn.Write(last)
@@ -133,7 +161,7 @@ func main() {
 		}
 	})()
 
-	time.Sleep(100 * time.Millisecond)
+	time.Sleep(200 * time.Millisecond)
 
 	server.RegisterSource(
 		"test",
