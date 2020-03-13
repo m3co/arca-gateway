@@ -55,71 +55,27 @@ test('Reconnect and process the request', async () => {
     }
 });
 
-test('A response in two parts', async () => {
-    try {
-        const arca = new Arca();
-        arca.config.arca.port = '22346'
+['2', '3', '4'].forEach((part: string) => {
+    test(`A response in ${part} parts`, async () => {
+        try {
+            const arca = new Arca();
+            arca.config.arca.port = '22346'
 
-        const id = 'id-of-error';
-        await arca.connect();
+            const id = 'id-of-error';
+            await arca.connect();
 
-        const request = {
-            ID: id,
-            Method: 'msg-in-2-parts',
-            Context: {
-                Source: 'test-source'
+            const request = {
+                ID: id,
+                Method: `msg-in-${part}-parts`,
+                Context: {
+                    Source: 'test-source'
+                }
             }
+
+            const response = await arca.request(request);
+            expect(response.ID).toBe(id);
+        } catch(err) {
+            fail(err);
         }
-
-        const response = await arca.request(request);
-        expect(response.ID).toBe(id);
-    } catch(err) {
-        fail(err);
-    }
-});
-
-test('A response in three parts', async () => {
-    try {
-        const arca = new Arca();
-        arca.config.arca.port = '22346'
-
-        const id = 'id-of-error';
-        await arca.connect();
-
-        const request = {
-            ID: id,
-            Method: 'msg-in-3-parts',
-            Context: {
-                Source: 'test-source'
-            }
-        }
-
-        const response = await arca.request(request);
-        expect(response.ID).toBe(id);
-    } catch(err) {
-        fail(err);
-    }
-});
-
-test('A response in four parts', async () => {
-    try {
-        const arca = new Arca();
-        arca.config.arca.port = '22346'
-
-        const id = 'id-of-error';
-        await arca.connect();
-
-        const request = {
-            ID: id,
-            Method: 'msg-in-4-parts',
-            Context: {
-                Source: 'test-source'
-            }
-        }
-
-        const response = await arca.request(request);
-        expect(response.ID).toBe(id);
-    } catch(err) {
-        fail(err);
-    }
+    });
 });
