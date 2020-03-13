@@ -83,34 +83,20 @@ export class Arca {
             resolve: (value: Response | PromiseLike<Response>) => void,
             reject: (reason: NodeJS.ErrnoException) => void,
         ) => {
-            const processMsgs = (data: Buffer) => {
-                const msg = data.toString();
-                try {
-                    const result = JSON.parse(msg) as Response;
-                    resolve(result);
-                } catch(err) {
-                    arca.once('data', (extraData: Buffer) => {
-                        const extraMsg = `${msg}${extraData.toString()}`;
-                        try {
-                            const result = JSON.parse(extraMsg) as Response;
-                            resolve(result);
-                        } catch(err) {
-                            arca.once('data', (extraExtraData: Buffer) => {
-                                const extraExtraMsg = `${extraMsg}${extraExtraData.toString()}`;
-                                try {
-                                    const result = JSON.parse(extraExtraMsg) as Response;
-                                    resolve(result);
-                                } catch(err) {
-                                    console.log('gosh! this is too deep', err);
-                                }
-                            });
-                        }
-                    });
-                }
-            };
+            function processMsg(prevMsg: string) {
+                arca.once('data', (data: Buffer) => {
+                    const msg = `${prevMsg}${data.toString()}`;
+                    try {
+                        const response = JSON.parse(msg) as Response;
+                        resolve(response);
+                    } catch(err) {
+                        processMsg(msg);
+                    }
+                });
+            }
 
             arca.once('error', reject);
-            arca.once('data', processMsgs);
+            processMsg('');
             arca.write(`${JSON.stringify(request)}\n`);
         });
     }
