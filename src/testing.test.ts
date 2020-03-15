@@ -103,19 +103,17 @@ test(`Two responses in 1 parts`, async () => {
         expect(response.ID).toBe(id);
 
         for await(const extraResponse of arca.responses()) {
-            expect(extraResponse).toStrictEqual([
-                {
-                    "Context": {
-                        "Source": "test",
-                    },
-                    "Error": null,
-                    "ID": "something else",
-                    "Method": "error-in-the-middle",
-                    "Result": {
-                        "Message": "this is the message",
-                    },
+            expect(extraResponse).toStrictEqual({
+                "Context": {
+                    "Source": "test",
                 },
-            ]);
+                "Error": null,
+                "ID": "something else",
+                "Method": "error-in-the-middle",
+                "Result": {
+                    "Message": "this is the message",
+                },
+            });
             break;
         }
 

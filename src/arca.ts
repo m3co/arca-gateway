@@ -93,7 +93,9 @@ export class Arca {
 
     async *responses() {
         while (true) {
-            yield await this.getResponses();
+            for (const response of await this.getResponses()) {
+                yield response;
+            }
         }
     }
 }
