@@ -221,6 +221,7 @@ test(`Two responses in 2 parts - case first response ok(no EOL), second response
         const response = await arca.request(request);
         expect(response.ID).toBe(id);
 
+        let i = 0;
         for await(const extraResponse of arca.responses()) {
             expect(extraResponse).toStrictEqual({
                 "Context": {
@@ -233,19 +234,21 @@ test(`Two responses in 2 parts - case first response ok(no EOL), second response
                     "Message": "this is the message",
                 },
             });
-            break;
+            i++;
+            if (i > 1) {
+                fail(new Error('Unexpected execution. Got extraResponses'));
+            }
         }
-
         arca.disconnect();
     } catch(err) {
-        fail(err);
+        const error = err as Error;
+        if (error.message !== 'Timeout at getResponses()') {
+            fail(err);
+        }
     }
 });
 
 // Probar
-// Request> [Msg1, Msg2]: Msg1 = PartA U PartB(incluido el ENTER), Msg2 = (sin el ENTER)Msg2
-// Request> [Msg1, Msg2]: Msg1 = PartA U PartB(sin el ENTER), Msg2 = (incluido el ENTER)Msg2
-
 // RequestA, RequestB> [ResponseA, ResponseB]
 // RequestA, RequestB> [ResponseB, ResponseA]
 // Esperar 2 Responses
