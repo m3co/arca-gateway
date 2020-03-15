@@ -122,3 +122,14 @@ test(`Two responses in 1 parts`, async () => {
         fail(err);
     }
 });
+
+
+// Probar
+// Request> [Msg1, Msg2]: Msg1 = PartA U PartB, Msg2 = Msg2
+// Request> [Msg1, Msg2]: Msg1 = PartA U PartB, Msg2 = PartB U PartC
+// Request> [Msg1, Msg2]: Msg1 = PartA U PartB(incluido el ENTER), Msg2 = (sin el ENTER)Msg2
+// Request> [Msg1, Msg2]: Msg1 = PartA U PartB(sin el ENTER), Msg2 = (incluido el ENTER)Msg2
+
+// RequestA, RequestB> [ResponseA, ResponseB]
+// RequestA, RequestB> [ResponseB, ResponseA]
+// Esperar 2 Responses
