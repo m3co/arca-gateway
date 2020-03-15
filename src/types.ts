@@ -1,4 +1,8 @@
 
+export const ECONNRESET = 'ECONNRESET';
+export const ECONNREFUSED = 'ECONNREFUSED';
+export const errorUnexpectedEndJSONInput = 'Unexpected end of JSON input'.toLocaleLowerCase();
+
 export interface Response {
     ID: string;
     Context: {
@@ -24,7 +28,7 @@ export interface Request {
 }
 
 export interface ResponsesIterator {
-    next(value?: Response): Promise<IteratorResult<Response[]>>;
-    return?(value?: Response): Promise<IteratorResult<Response[]>>;
-    throw?(e?: Error): Promise<IteratorResult<Response[]>>;
+    next(value?: Response[]): Promise<IteratorResult<Response[]>>;
+    return?(value?: Response[]): Promise<IteratorResult<Response[]>>;
+    throw?(e?: Error): Promise<IteratorResult<Error>>;
 }
