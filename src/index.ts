@@ -33,6 +33,7 @@ export class Arca {
     private arca: Socket;
     private retryToConnectTimeoutID: NodeJS.Timeout | null = null;
     private responseQueue: Response[] = [];
+    private bufferMsg: string = '';
     public config: {
         [key: string]: {
             [key: string]: string;
@@ -43,6 +44,7 @@ export class Arca {
         const config = parse(readFileSync(configLocation, 'utf-8'));
         const arca = new Socket();
         arca.setEncoding('utf-8');
+        arca.on('data', this.processData);
 
         this.arca = arca;
         this.config = config;
@@ -56,15 +58,18 @@ export class Arca {
             resolve: () => void,
             reject: (reason: NodeJS.ErrnoException) => void
         ) => {
-            arca.on('error', (err: NodeJS.ErrnoException) => {
+            const processError = (err: NodeJS.ErrnoException) => {
                 if (err.code === ECONNREFUSED || err.code === ECONNRESET) {
                     this.retryToConnectTimeoutID = setTimeout(() => {
+                        arca.once('error', processError);
                         arca.connect(Number(config.arca.port), config.arca.host);
                     }, retryToConnectTimeout);
                     return;
                 }
                 reject(err);
-            });
+            };
+
+            arca.once('error', processError);
             arca.once('error', reject);
             arca.once('connect', resolve);
             arca.connect(Number(config.arca.port), config.arca.host);
@@ -80,6 +85,30 @@ export class Arca {
         this.arca.end();
     }
 
+    private static processRows = (msg: string): Response[] => {
+        const rows = msg.split('\n').filter((str) => str.length > 0);
+        const responses = rows.map((row: string) => {
+            return JSON.parse(row) as Response;
+        });
+        return responses;
+    }
+
+    private processData = (data: Buffer) => {
+        const msg = data.toString();
+        this.bufferMsg += msg;
+        try {
+            const responses = Arca.processRows(this.bufferMsg);
+            this.bufferMsg = '';
+            this.responseQueue.push(...responses);
+        } catch(err) {
+            const error = err as Error;
+            const errorMessage = error.message.toLocaleLowerCase();
+            if (errorMessage !== errorUnexpectedEndJSONInput) {
+                throw error;
+            }
+        }
+    }
+
     // send the request to Arca
     request(request: Request): Promise<Response> {
         const { arca } = this;
@@ -89,37 +118,17 @@ export class Arca {
             resolve: (value: Response | PromiseLike<Response>) => void,
             reject: (reason: NodeJS.ErrnoException) => void,
         ) => {
-            const processRows = (msg: string) => {
-                const rows = msg.split('\n').filter((str) => str.length > 0);
-                rows.forEach((row: string) => {
-                    const response = JSON.parse(row) as Response;
+            const searchResponse = () => {
+                this.responseQueue.forEach((response: Response): void => {
                     if (response.ID === ID) {
                         resolve(response);
-                    } else {
-                        this.responseQueue.push(response); // still don't know it
+                        arca.off('data', searchResponse);
                     }
-                });
+                })
             }
 
-            const processMsg = (prevMsg: string = '') => {
-                arca.once('data', (data: Buffer) => {
-                    const msg = `${prevMsg}${data.toString()}`;
-                    try {
-                        processRows(msg)
-                    } catch(err) {
-                        const error = err as Error;
-                        const errorMessage = error.message.toLocaleLowerCase();
-                        if (errorMessage === errorUnexpectedEndJSONInput) {
-                            processMsg(msg);
-                        } else {
-                            reject(error);
-                        }
-                    }
-                });
-            }
-
+            arca.on('data', searchResponse);
             arca.once('error', reject);
-            processMsg();
             arca.write(`${JSON.stringify(request)}\n`);
         });
     }
