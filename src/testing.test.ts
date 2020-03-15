@@ -99,6 +99,21 @@ test(`Two responses in 1 parts`, async () => {
 
         const response = await arca.request(request);
         expect(response.ID).toBe(id);
+
+        // this equality SHOULD NOT exists here
+        expect(arca.getResponses()).toStrictEqual([
+          {
+            "Context": {
+              "Source": "test",
+            },
+            "Error": null,
+            "ID": "something else",
+            "Method": "error-in-the-middle",
+            "Result": {
+              "Message": "this is the message",
+            },
+          },
+        ]);
     } catch(err) {
         fail(err);
     }

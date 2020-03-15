@@ -10,7 +10,9 @@ const errorUnexpectedEndJSONInput = 'Unexpected end of JSON input'.toLocaleLower
 export interface Response {
     ID: string;
     Context: {
-        Source: string
+        Source: string;
+        Target: string;
+        Notification: true;
     };
     Result: {
         [key: string]: string;
@@ -93,6 +95,7 @@ export class Arca {
         return responses;
     }
 
+    // processData turns the data comming from Arca into Responses
     private processData = (data: Buffer) => {
         const msg = data.toString();
         this.bufferMsg += msg;
@@ -109,6 +112,10 @@ export class Arca {
         }
     }
 
+    getResponses(): Response[] {
+        return [...this.responseQueue];
+    }
+
     // send the request to Arca
     request(request: Request): Promise<Response> {
         const { arca } = this;
@@ -119,12 +126,15 @@ export class Arca {
             reject: (reason: NodeJS.ErrnoException) => void,
         ) => {
             const searchResponse = () => {
-                this.responseQueue.forEach((response: Response): void => {
+                const filtred = this.responseQueue.filter((response: Response): boolean => {
                     if (response.ID === ID) {
                         resolve(response);
                         arca.off('data', searchResponse);
+                        return false;
                     }
-                })
+                    return true;
+                });
+                this.responseQueue = filtred;
             }
 
             arca.on('data', searchResponse);
