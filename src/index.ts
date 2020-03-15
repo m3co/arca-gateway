@@ -95,27 +95,39 @@ export class Arca {
         handler: (data: Buffer) => void,
         getResponseByID: (ID: string) => Promise<Response>,
     } {
-        let resolver: (value: Response | PromiseLike<Response>) => void;
-        const responseQueue: Response[] = [];
-        const bus = {
-            processResponses: (responses: Response[]): void => {
-                responseQueue.push(...responses);
-                resolver(responseQueue[0]);
-            },
-            bufferMsg: ''
-        };
+        let callbacks: (() => void)[] = [];
+        let responseQueue: Response[] = [];
 
         const getResponseByID = (ID: string): Promise<Response> => {
             return new Promise<Response>((
                 resolve: (value: Response | PromiseLike<Response>) => void,
-                reject: (reason: NodeJS.ErrnoException) => void,
+                reject: (reason: Error) => void,
             ) => {
-                resolver = resolve;
+                const timeout = setTimeout(() => {
+                    reject(new Error(`Timeout at getResponseByID('${ID}')`));
+                }, 1000);
+                const callback = () => {
+                    responseQueue = responseQueue.filter((response: Response): boolean => {
+                        if (response.ID === ID) {
+                            resolve(response);
+                            clearTimeout(timeout);
+                            return false;
+                        }
+                        return true;
+                    });
+                };
+                callbacks.push(callback);
             });
         }
 
         return {
-            handler: Arca.processData(bus),
+            handler: Arca.processData({
+                processResponses: (responses: Response[]): void => {
+                    responseQueue.push(...responses);
+                    callbacks.forEach(callback => callback());
+                },
+                bufferMsg: ''
+            }),
             getResponseByID
         }
     }
