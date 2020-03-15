@@ -18,7 +18,7 @@ test('Send a first simple request', async () => {
 
         const response = await arca.request(request);
         expect(response.ID).toBe(id);
-
+        arca.disconnect();
     } catch(err) {
         fail(err);
     }
@@ -46,6 +46,7 @@ test('Reconnect and process the request', async () => {
                 try {
                     const response = await arca.request(request);
                     expect(response.ID).toBe(id);
+                    arca.disconnect();
                     resolve();
                 } catch(err) {
                     reject(err);
@@ -74,6 +75,7 @@ test('Reconnect and process the request', async () => {
 
             const response = await arca.request(request);
             expect(response.ID).toBe(id);
+            arca.disconnect();
         } catch(err) {
             fail(err);
         }
@@ -99,7 +101,6 @@ test(`Two responses in 1 parts`, async () => {
 
         const response = await arca.request(request);
         expect(response.ID).toBe(id);
-
         expect((await arca.responses().next()).value).toStrictEqual([
           {
             "Context": {
@@ -113,6 +114,7 @@ test(`Two responses in 1 parts`, async () => {
             },
           },
         ]);
+        arca.disconnect();
     } catch(err) {
         fail(err);
     }
