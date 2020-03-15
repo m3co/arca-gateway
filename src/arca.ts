@@ -38,9 +38,17 @@ const processData = (bus: {
 const prepareHandler = (): {
     handler: (data: Buffer) => void,
     getResponseByID: (ID: string) => Promise<Response>,
+    getResponses: () => Promise<Response[]>,
 } => {
     let callbacks: (() => void)[] = [];
     let responseQueue: Response[] = [];
+
+    function clear(timeout: NodeJS.Timeout, currentCallback: () => void) {
+        clearTimeout(timeout);
+        callbacks = callbacks.filter(callback => {
+            return callback !== currentCallback;
+        });
+    }
 
     const getResponseByID = (ID: string): Promise<Response> => {
         return new Promise<Response>((
@@ -54,13 +62,22 @@ const prepareHandler = (): {
                 responseQueue = responseQueue.filter((response: Response): boolean => {
                     if (response.ID === ID) {
                         resolve(response);
-                        clearTimeout(timeout);
+                        clear(timeout, callback);
                         return false;
                     }
                     return true;
                 });
             };
             callbacks.push(callback);
+        });
+    }
+
+    const getResponses = (): Promise<Response[]> => {
+        return new Promise<Response[]>((
+            resolve: (value: Response[] | PromiseLike<Response[]>) => void,
+        ) => {
+            resolve([...responseQueue]);
+            responseQueue.length = 0;
         });
     }
 
@@ -72,16 +89,16 @@ const prepareHandler = (): {
             },
             bufferMsg: ''
         }),
-        getResponseByID
+        getResponseByID,
+        getResponses,
     }
 }
 
 export class Arca {
     private arca: Socket;
     private retryToConnectTimeoutID: NodeJS.Timeout | null = null;
-    private getResponseByID = (ID: string): Promise<Response> => {
-        return Promise.reject('Unexpected getResponseByID method');
-    };
+    private getResponseByID: ((ID: string) => Promise<Response>) | null = null;
+    private getResponses: (() => Promise<Response[]>) | null = null;
 
     public config: {
         [key: string]: {
@@ -95,6 +112,7 @@ export class Arca {
         arca.setEncoding('utf-8');
         const bus = prepareHandler();
         this.getResponseByID = bus.getResponseByID;
+        this.getResponses = bus.getResponses;
         arca.on('data', bus.handler);
 
         this.arca = arca;
@@ -147,11 +165,22 @@ export class Arca {
             arca.write(`${JSON.stringify(request)}\n`);
 
             try {
-                const response = await this.getResponseByID(request.ID);
-                resolve(response);
+                if (this.getResponseByID) {
+                    const response = await this.getResponseByID(request.ID);
+                    resolve(response);
+                } else {
+                    reject(new Error('getResponseByID undefined'));
+                }
             } catch(err) {
                 reject(err);
             }
         });
+    }
+
+    responses(): Promise<Response[]> {
+        if (this.getResponses) {
+            return this.getResponses();
+        }
+        return Promise.reject(new Error('getResponses undefined'));
     }
 }
