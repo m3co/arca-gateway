@@ -11,9 +11,7 @@ const errorUnexpectedEndJSONInput = 'Unexpected end of JSON input'.toLocaleLower
 
 const processRows = (msg: string): Response[] => {
     const rows = msg.split('\n').filter((str) => str.length > 0);
-    const responses = rows.map((row: string) => {
-        return JSON.parse(row) as Response;
-    });
+    const responses = rows.map((row: string) => JSON.parse(row) as Response);
     return responses;
 }
 
@@ -45,9 +43,7 @@ const prepareHandler = (): {
 
     function clear(timeout: NodeJS.Timeout, currentCallback: () => void) {
         clearTimeout(timeout);
-        callbacks = callbacks.filter(callback => {
-            return callback !== currentCallback;
-        });
+        callbacks = callbacks.filter(callback => callback !== currentCallback);
     }
 
     const getResponseByID = (ID: string): Promise<Response> => {
@@ -87,7 +83,7 @@ const prepareHandler = (): {
                 responseQueue.push(...responses);
                 callbacks.forEach(callback => callback());
             },
-            bufferMsg: ''
+            bufferMsg: '',
         }),
         getResponseByID,
         getResponses,
@@ -156,7 +152,7 @@ export class Arca {
 
     // send the request to Arca
     request(request: Request): Promise<Response> {
-        const { arca } = this;
+        const { arca, getResponseByID } = this;
         return new Promise<Response>(async (
             resolve: (value: Response | PromiseLike<Response>) => void,
             reject: (reason: NodeJS.ErrnoException) => void,
@@ -165,8 +161,8 @@ export class Arca {
             arca.write(`${JSON.stringify(request)}\n`);
 
             try {
-                if (this.getResponseByID) {
-                    const response = await this.getResponseByID(request.ID);
+                if (getResponseByID) {
+                    const response = await getResponseByID(request.ID);
                     resolve(response);
                 } else {
                     reject(new Error('getResponseByID undefined'));
