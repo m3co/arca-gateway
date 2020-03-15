@@ -27,7 +27,7 @@ const processData = (bus: {
 
 export const prepareHandler = (): {
     handler: (data: Buffer) => void,
-    getResponseByID: (ID: string) => Promise<Response>,
+    getResponseByID: (ID: string, waitForResponseTimeout: number) => Promise<Response>,
     getResponses: () => Promise<Response[]>,
 } => {
     let callbacks: (() => void)[] = [];
@@ -38,14 +38,14 @@ export const prepareHandler = (): {
         callbacks = callbacks.filter(callback => callback !== currentCallback);
     }
 
-    const getResponseByID = (ID: string): Promise<Response> => {
+    const getResponseByID = (ID: string, waitForResponseTimeout: number): Promise<Response> => {
         return new Promise<Response>((
             resolve: (value: Response | PromiseLike<Response>) => void,
             reject: (reason: Error) => void,
         ) => {
             const timeout = setTimeout(() => {
                 reject(new Error(`Timeout at getResponseByID('${ID}')`));
-            }, 1000);
+            }, waitForResponseTimeout);
             const callback = () => {
                 responseQueue = responseQueue.filter((response: Response): boolean => {
                     if (response.ID === ID) {

@@ -3,14 +3,16 @@ import { readFileSync } from 'fs';
 import { Socket } from 'net';
 import { parse } from 'ini';
 
-import { ECONNRESET, ECONNREFUSED, Response, Request, ResponsesIterator } from './types';
+import { ECONNRESET, ECONNREFUSED, Response, Request } from './types';
 import { prepareHandler } from './arca-utils';
 
 export class Arca {
     private arca: Socket;
     private retryToConnectTimeoutID: NodeJS.Timeout | null = null;
-    private getResponseByID: ((ID: string) => Promise<Response>) | null = null;
-    private getResponses: (() => Promise<Response[]>) | null = null;
+    private getResponseByID: ((ID: string, waitForResponseTimeout: number) => Promise<Response>) = () =>
+        Promise.reject(new Error('define getResponseByID internally'));
+    private getResponses: (() => Promise<Response[]>) = () =>
+        Promise.reject(new Error('define getResponses internally'));
 
     public config: {
         [key: string]: {
@@ -67,7 +69,7 @@ export class Arca {
     }
 
     // send the request to Arca
-    request(request: Request): Promise<Response> {
+    request(request: Request, waitForResponseTimeout: number = 1000): Promise<Response> {
         const { arca, getResponseByID } = this;
         return new Promise<Response>(async (
             resolve: (value: Response | PromiseLike<Response>) => void,
@@ -78,7 +80,7 @@ export class Arca {
 
             try {
                 if (getResponseByID) {
-                    const response = await getResponseByID(request.ID);
+                    const response = await getResponseByID(request.ID, waitForResponseTimeout);
                     resolve(response);
                 } else {
                     reject(new Error('getResponseByID undefined'));
@@ -89,12 +91,9 @@ export class Arca {
         });
     }
 
-    async *responses(): ResponsesIterator {
-        if (this.getResponses) {
-            while (true) {
-                yield this.getResponses();
-            }
+    async *responses() {
+        while (true) {
+            yield await this.getResponses();
         }
-        return Promise.reject(new Error('getResponses undefined'));
     }
 }

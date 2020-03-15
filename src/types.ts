@@ -26,9 +26,3 @@ export interface Request {
         [key:string]: string;
     }
 }
-
-export interface ResponsesIterator {
-    next(value?: Response[]): Promise<IteratorResult<Response[]>>;
-    return?(value?: Response[]): Promise<IteratorResult<Response[]>>;
-    throw?(e?: Error): Promise<IteratorResult<Error>>;
-}
