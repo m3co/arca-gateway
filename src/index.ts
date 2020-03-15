@@ -34,7 +34,10 @@ export interface Request {
 export class Arca {
     private arca: Socket;
     private retryToConnectTimeoutID: NodeJS.Timeout | null = null;
-    private responseQueue: Response[] = []; // I've to get rid of this variable
+    private getResponseByID = (ID: string): Promise<Response> => {
+        return Promise.reject('Unexpected getResponseByID method');
+    };
+
     public config: {
         [key: string]: {
             [key: string]: string;
@@ -45,8 +48,9 @@ export class Arca {
         const config = parse(readFileSync(configLocation, 'utf-8'));
         const arca = new Socket();
         arca.setEncoding('utf-8');
-        const r = this.prepareHandler();
-        arca.on('data', r.handler);
+        const bus = this.prepareHandler();
+        this.getResponseByID = bus.getResponseByID;
+        arca.on('data', bus.handler);
 
         this.arca = arca;
         this.config = config;
@@ -88,16 +92,31 @@ export class Arca {
     }
 
     private prepareHandler(): {
-        handler: (data: Buffer) => void
+        handler: (data: Buffer) => void,
+        getResponseByID: (ID: string) => Promise<Response>,
     } {
-        const processResponses = (responses: Response[]): void => {
-            this.responseQueue.push(...responses);
+        let resolver: (value: Response | PromiseLike<Response>) => void;
+        const responseQueue: Response[] = [];
+        const bus = {
+            processResponses: (responses: Response[]): void => {
+                responseQueue.push(...responses);
+                resolver(responseQueue[0]);
+            },
+            bufferMsg: ''
         };
+
+        const getResponseByID = (ID: string): Promise<Response> => {
+            return new Promise<Response>((
+                resolve: (value: Response | PromiseLike<Response>) => void,
+                reject: (reason: NodeJS.ErrnoException) => void,
+            ) => {
+                resolver = resolve;
+            });
+        }
+
         return {
-            handler: Arca.processData({
-                processResponses,
-                bufferMsg: ''
-            })
+            handler: Arca.processData(bus),
+            getResponseByID
         }
     }
 
@@ -131,26 +150,19 @@ export class Arca {
     // send the request to Arca
     request(request: Request): Promise<Response> {
         const { arca } = this;
-
-        return new Promise<Response>((
+        return new Promise<Response>(async (
             resolve: (value: Response | PromiseLike<Response>) => void,
             reject: (reason: NodeJS.ErrnoException) => void,
         ) => {
-            const searchResponse = (ID: string) => () => {
-                const filtred = this.responseQueue.filter((response: Response): boolean => {
-                    if (response.ID === ID) {
-                        resolve(response);
-                        arca.off('data', searchResponse);
-                        return false;
-                    }
-                    return true;
-                });
-                this.responseQueue = filtred;
-            }
-
-            arca.on('data', searchResponse(request.ID));
             arca.once('error', reject);
             arca.write(`${JSON.stringify(request)}\n`);
+
+            try {
+                const response = await this.getResponseByID(request.ID);
+                resolve(response);
+            } catch(err) {
+                reject(err);
+            }
         });
     }
 }
