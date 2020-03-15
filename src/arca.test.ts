@@ -202,6 +202,46 @@ test(`Two responses in 2 parts - case first response ok, second response broken`
     }
 });
 
+test(`Two responses in 2 parts - case first response ok(no EOL), second response broken`, async () => {
+    try {
+        const arca = new Arca();
+        arca.config.arca.port = '22346'
+
+        const id = 'id-of-error';
+        await arca.connect();
+
+        const request = {
+            ID: id,
+            Method: `2-msg-in-2-parts-where-1-ok-noEOL-2-break`,
+            Context: {
+                Source: 'test-source'
+            }
+        }
+
+        const response = await arca.request(request);
+        expect(response.ID).toBe(id);
+
+        for await(const extraResponse of arca.responses()) {
+            expect(extraResponse).toStrictEqual({
+                "Context": {
+                    "Source": "test",
+                },
+                "Error": null,
+                "ID": "something else",
+                "Method": "error-in-the-middle",
+                "Result": {
+                    "Message": "this is the message",
+                },
+            });
+            break;
+        }
+
+        arca.disconnect();
+    } catch(err) {
+        fail(err);
+    }
+});
+
 // Probar
 // Request> [Msg1, Msg2]: Msg1 = PartA U PartB(incluido el ENTER), Msg2 = (sin el ENTER)Msg2
 // Request> [Msg1, Msg2]: Msg1 = PartA U PartB(sin el ENTER), Msg2 = (incluido el ENTER)Msg2

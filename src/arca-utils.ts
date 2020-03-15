@@ -11,6 +11,7 @@ const processData = (bus: {
     processResponses: (responses: Response[]) => void,
     bufferMsg: string
 }) => (data: Buffer) => {
+    console.log(`--${data.toString()}--`)
     bus.bufferMsg += data.toString();
     try {
         const responses = processRows(bus.bufferMsg);
