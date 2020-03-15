@@ -100,7 +100,7 @@ test(`Two responses in 1 parts`, async () => {
         const response = await arca.request(request);
         expect(response.ID).toBe(id);
 
-        expect(await arca.responses()).toStrictEqual([
+        expect((await arca.responses().next()).value).toStrictEqual([
           {
             "Context": {
               "Source": "test",

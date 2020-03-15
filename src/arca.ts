@@ -3,7 +3,7 @@ import { readFileSync } from 'fs';
 import { Socket } from 'net';
 import { parse } from 'ini';
 
-import { Response, Request } from './types';
+import { Response, Request, ResponsesIterator } from './types';
 
 const ECONNRESET = 'ECONNRESET';
 const ECONNREFUSED = 'ECONNREFUSED';
@@ -177,9 +177,11 @@ export class Arca {
         });
     }
 
-    responses(): Promise<Response[]> {
+    async *responses(): ResponsesIterator {
         if (this.getResponses) {
-            return this.getResponses();
+            while (true) {
+                yield this.getResponses();
+            }
         }
         return Promise.reject(new Error('getResponses undefined'));
     }
