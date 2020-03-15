@@ -101,6 +101,7 @@ test(`Two responses in 1 parts`, async () => {
         expect(response.ID).toBe(id);
 
         // this equality SHOULD NOT exists here
+        /*
         expect(arca.getResponses()).toStrictEqual([
           {
             "Context": {
@@ -114,6 +115,7 @@ test(`Two responses in 1 parts`, async () => {
             },
           },
         ]);
+        */
     } catch(err) {
         fail(err);
     }

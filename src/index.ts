@@ -34,8 +34,7 @@ export interface Request {
 export class Arca {
     private arca: Socket;
     private retryToConnectTimeoutID: NodeJS.Timeout | null = null;
-    private responseQueue: Response[] = [];
-    private bufferMsg: string = '';
+    private responseQueue: Response[] = []; // I've to get rid of this variable
     public config: {
         [key: string]: {
             [key: string]: string;
@@ -46,7 +45,8 @@ export class Arca {
         const config = parse(readFileSync(configLocation, 'utf-8'));
         const arca = new Socket();
         arca.setEncoding('utf-8');
-        arca.on('data', this.processData);
+        const r = this.prepareHandler();
+        arca.on('data', r.handler);
 
         this.arca = arca;
         this.config = config;
@@ -87,6 +87,20 @@ export class Arca {
         this.arca.end();
     }
 
+    private prepareHandler(): {
+        handler: (data: Buffer) => void
+    } {
+        const processResponses = (responses: Response[]): void => {
+            this.responseQueue.push(...responses);
+        };
+        return {
+            handler: Arca.processData({
+                processResponses,
+                bufferMsg: ''
+            })
+        }
+    }
+
     private static processRows = (msg: string): Response[] => {
         const rows = msg.split('\n').filter((str) => str.length > 0);
         const responses = rows.map((row: string) => {
@@ -96,13 +110,15 @@ export class Arca {
     }
 
     // processData turns the data comming from Arca into Responses
-    private processData = (data: Buffer) => {
-        const msg = data.toString();
-        this.bufferMsg += msg;
+    private static processData = (bus: {
+        processResponses: (responses: Response[]) => void,
+        bufferMsg: string
+    }) => (data: Buffer) => {
+        bus.bufferMsg += data.toString();
         try {
-            const responses = Arca.processRows(this.bufferMsg);
-            this.bufferMsg = '';
-            this.responseQueue.push(...responses);
+            const responses = Arca.processRows(bus.bufferMsg);
+            bus.bufferMsg = '';
+            bus.processResponses(responses);
         } catch(err) {
             const error = err as Error;
             const errorMessage = error.message.toLocaleLowerCase();
@@ -112,20 +128,15 @@ export class Arca {
         }
     }
 
-    getResponses(): Response[] {
-        return [...this.responseQueue];
-    }
-
     // send the request to Arca
     request(request: Request): Promise<Response> {
         const { arca } = this;
-        const { ID } = request;
 
         return new Promise<Response>((
             resolve: (value: Response | PromiseLike<Response>) => void,
             reject: (reason: NodeJS.ErrnoException) => void,
         ) => {
-            const searchResponse = () => {
+            const searchResponse = (ID: string) => () => {
                 const filtred = this.responseQueue.filter((response: Response): boolean => {
                     if (response.ID === ID) {
                         resolve(response);
@@ -137,7 +148,7 @@ export class Arca {
                 this.responseQueue = filtred;
             }
 
-            arca.on('data', searchResponse);
+            arca.on('data', searchResponse(request.ID));
             arca.once('error', reject);
             arca.write(`${JSON.stringify(request)}\n`);
         });
