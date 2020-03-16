@@ -158,6 +158,31 @@ func handleRequest(conn net.Conn) {
 		conn.Write(second)
 	}
 
+	if request.Method == "2-msg-in-2-parts-where-1-break-2-break" {
+		response.ID = "something else"
+		responseMsg2, _ := json.Marshal(response)
+		twoMessages := []byte(fmt.Sprintf("%s\n%s", string(responseMsg), string(responseMsg2)))
+
+		first := twoMessages[:100]
+		second := twoMessages[100:200]
+		third := twoMessages[200:]
+
+		fmt.Println(string(first))
+		conn.Write(first)
+
+		fmt.Println("waiting...")
+		time.Sleep(200 * time.Millisecond)
+
+		fmt.Println(string(second))
+		conn.Write(second)
+
+		fmt.Println("waiting...")
+		time.Sleep(200 * time.Millisecond)
+
+		fmt.Println(string(third))
+		conn.Write(third)
+	}
+
 	if request.Method == "2-msg-in-2-parts-where-1-ok-noEOL-2-break" {
 		response.ID = "something else"
 		responseMsg2, _ := json.Marshal(response)
