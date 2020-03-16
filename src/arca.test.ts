@@ -1,5 +1,6 @@
 
 import { Arca } from './index';
+import { Request } from './types';
 import { v4 as uuidv4 } from 'uuid';
 
 test('Send a first simple request', async () => {
@@ -285,6 +286,43 @@ test(`Two responses in 2 parts - first response ok(no EOL), second response brok
         if (error.message !== 'Timeout at getResponses()') {
             fail(err);
         }
+    }
+});
+
+test('Three requests', async () => {
+    try {
+        const arca = new Arca();
+        await arca.connect();
+
+        const requests = [{
+            ID: uuidv4(),
+            Method: 'test',
+            Context: {
+                Source: 'test-source',
+            }
+        },
+        {
+            ID: uuidv4(),
+            Method: 'test',
+            Context: {
+                Source: 'test-source'
+            }
+        },
+        {
+            ID: uuidv4(),
+            Method: 'test',
+            Context: {
+                Source: 'test-source'
+            }
+        }] as Request[];
+
+        const responses = await Promise.all(requests.map(request => arca.request(request)));
+        responses.forEach((response, i) => {
+            expect(response.ID).toBe(requests[i].ID);
+        });
+        arca.disconnect();
+    } catch(err) {
+        fail(err);
     }
 });
 
