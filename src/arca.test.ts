@@ -122,7 +122,7 @@ test(`Two responses in 1 parts`, async () => {
     }
 });
 
-test(`Two responses in 2 parts - case first response broken, second response ok`, async () => {
+test(`Two responses in 2 parts - first response broken, second response ok`, async () => {
     try {
         const arca = new Arca();
         arca.config.arca.port = '22346'
@@ -162,7 +162,7 @@ test(`Two responses in 2 parts - case first response broken, second response ok`
     }
 });
 
-test(`Two responses in 2 parts - case first response ok, second response broken`, async () => {
+test(`Two responses in 2 parts - first response ok, second response broken`, async () => {
     try {
         const arca = new Arca();
         arca.config.arca.port = '22346'
@@ -202,7 +202,7 @@ test(`Two responses in 2 parts - case first response ok, second response broken`
     }
 });
 
-test(`Two responses in 2 parts - case first response broken, second response broken`, async () => {
+test(`Two responses in 2 parts - first response broken, second response broken`, async () => {
     try {
         const arca = new Arca();
         arca.config.arca.port = '22346'
@@ -242,7 +242,7 @@ test(`Two responses in 2 parts - case first response broken, second response bro
     }
 });
 
-test(`Two responses in 2 parts - case first response ok(no EOL), second response broken`, async () => {
+test(`Two responses in 2 parts - first response ok(no EOL), second response broken`, async () => {
     try {
         const arca = new Arca();
         arca.config.arca.port = '22346'
