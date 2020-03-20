@@ -327,6 +327,4 @@ test('Three requests', async () => {
 });
 
 // Probar
-// RequestA, RequestB> [ResponseA, ResponseB]
-// RequestA, RequestB> [ResponseB, ResponseA]
 // Esperar 2 Responses
