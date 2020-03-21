@@ -26,10 +26,8 @@ export class Arca {
         };
 
         const { configLocation, onNotification } = {...defaultParams, ...(params || {})};
-        const config = parse(readFileSync(configLocation, 'utf-8'));
-        this.config = config;
-
-        const API = defineAPI(config, onNotification);
+        this.config = parse(readFileSync(configLocation, 'utf-8'));
+        const API = defineAPI(this.config, onNotification);
         this.connect = API.connect;
         this.disconnect = API.disconnect;
         this.request = API.request;
