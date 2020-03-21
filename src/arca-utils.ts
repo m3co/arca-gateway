@@ -32,7 +32,6 @@ const processData = (bus: {
 export const prepareHandler = (onNotification: (response: Response) => void): {
     handler: (data: Buffer) => void,
     getResponseByID: (ID: string, waitForResponseTimeout: number) => Promise<Response>,
-    getResponses: (waitForResponseTimeout: number) => Promise<Response[]>,
 } => {
     let callbacks: (() => void)[] = [];
     let responseQueue: Response[] = [];
@@ -64,44 +63,20 @@ export const prepareHandler = (onNotification: (response: Response) => void): {
         });
     }
 
-    const getResponses = (waitForResponseTimeout: number = 1000): Promise<Response[]> => {
-        return new Promise<Response[]>((
-            resolve: (value: Response[] | PromiseLike<Response[]>) => void,
-            reject: (reason: Error) => void,
-        ) => {
-            function action() {
-                resolve([...responseQueue]);
-                responseQueue.length = 0;
-            }
-            if (responseQueue.length) {
-                action();
-            } else {
-                const timeout = setTimeout(() => {
-                    reject(new Error(`Timeout at getResponses()`));
-                }, waitForResponseTimeout);
-                const callback = () => {
-                    action();
-                    clear(callback, timeout);
-                };
-                callbacks.push(callback);
-            }
-        });
-    }
-
     return {
         handler: processData({
             processResponses: (responses: Response[]): void => {
                 responses.forEach(response => {
-                    if (response.ID == '') {
+                    if (response.ID) {
+                        responseQueue.push(response);
+                    } else {
                         onNotification(response);
                     }
-                    responseQueue.push(response);
                 });
                 callbacks.forEach(callback => callback());
             },
             bufferMsg: '',
         }),
         getResponseByID,
-        getResponses,
     }
 }
