@@ -372,8 +372,6 @@ test(`One request - a response and a notification`, async () => {
     }
 });
 
-// This is an error. Never a response will come without sending a request!
-// but, who knows!
 test(`Connect and wait - got a response and a notification`, async () => {
     try { await new Promise(async (resolve, reject) => {
         let i = 0;
