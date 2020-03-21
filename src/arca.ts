@@ -29,6 +29,7 @@ export class Arca {
         const bus = prepareHandler();
         this.getResponseByID = bus.getResponseByID;
         this.getResponses = bus.getResponses;
+        this.getNotifications = bus.getNotifications;
         arca.on('data', bus.handler);
 
         this.arca = arca;

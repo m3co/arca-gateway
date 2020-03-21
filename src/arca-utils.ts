@@ -70,16 +70,18 @@ export const prepareHandler = (): {
             resolve: (value: Response[] | PromiseLike<Response[]>) => void,
             reject: (reason: Error) => void,
         ) => {
-            if (responseQueue.length) {
+            function action() {
                 resolve([...responseQueue]);
                 responseQueue.length = 0;
+            }
+            if (responseQueue.length) {
+                action();
             } else {
                 const timeout = setTimeout(() => {
                     reject(new Error(`Timeout at getResponses()`));
                 }, waitForResponseTimeout);
                 const callback = () => {
-                    resolve([...responseQueue]);
-                    responseQueue.length = 0;
+                    action();
                     clear(callback, timeout);
                 };
                 callbacks.push(callback);
@@ -92,13 +94,27 @@ export const prepareHandler = (): {
             resolve: (value: Response[] | PromiseLike<Response[]>) => void,
             reject: (reason: Error) => void,
         ) => {
-            if (responseQueue.length) {
-                resolve([...responseQueue]);
+            function action() {
+                const filtred = responseQueue.reduce((acc, curr) => {
+                    if (curr.ID) {
+                        acc.responses.push(curr);
+                    } else {
+                        acc.notifications.push(curr);
+                    }
+                    return acc;
+                }, {
+                    notifications: [] as Response[],
+                    responses: [] as Response[],
+                });
+                resolve(filtred.notifications);
                 responseQueue.length = 0;
+                //responseQueue.push(...filtred.responses); // I've to log this error
+            }
+            if (responseQueue.length) {
+                action();
             } else {
                 const callback = () => {
-                    resolve([...responseQueue]);
-                    responseQueue.length = 0;
+                    action();
                     clear(callback);
                 };
                 callbacks.push(callback);

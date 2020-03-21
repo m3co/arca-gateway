@@ -408,3 +408,37 @@ test(`Connect and wait - got a response and a notification`, async () => {
         }
     }
 });
+
+test(`Connect and wait - got a response and a notification but await only notifications`, async () => {
+    try {
+        const arca = new Arca();
+        arca.config.arca.port = '22347'
+
+        await arca.connect();
+        const expectedNotifications = [
+            {
+                ID: '',
+                Method: 'notification',
+                Context: { Source: 'test' },
+                Result: { Message: 'this is the message' },
+                Error: null
+            }
+        ];
+        let i = 0;
+        for await(const notification of arca.notifications()) {
+            if (notification.ID) {
+                fail(new Error('Unexpected execution. Got something strange'));
+            } else {
+                expect(notification).toStrictEqual(expectedNotifications[i]);
+                break;
+            }
+        }
+
+        arca.disconnect();
+    } catch(err) {
+        const error = err as Error;
+        if (error.message !== 'Timeout at getResponses()') {
+            fail(err);
+        }
+    }
+});
