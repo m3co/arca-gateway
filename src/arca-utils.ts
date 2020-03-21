@@ -1,5 +1,8 @@
 
-import { Response, errorUnexpectedEndJSONInput } from './types';
+import { Socket } from 'net';
+import { ECONNRESET, ECONNREFUSED,
+    errorUnexpectedEndJSONInput,
+    Request, Response } from './types';
 
 const processRows = (msg: string): Response[] => {
     const rows = msg.split('\n').filter((str) => str.length > 0);
@@ -78,5 +81,70 @@ export const prepareHandler = (onNotification: (response: Response) => void): {
             bufferMsg: '',
         }),
         getResponseByID,
+    }
+}
+
+export function defineAPI(config: {
+    [key: string]: any;
+}, onNotification: (response: Response) => void) {
+    let retryToConnectTimeoutID: NodeJS.Timeout | null;
+    const arca = new Socket();
+    arca.setEncoding('utf-8');
+
+    const bus = prepareHandler(onNotification);
+    arca.on('data', bus.handler);
+
+    const connect = (retryToConnectTimeout: number = 1000): Promise<void> => {
+        return new Promise<void>((
+            resolve: () => void,
+            reject: (reason: NodeJS.ErrnoException) => void
+        ) => {
+            const processError = (err: NodeJS.ErrnoException) => {
+                if (err.code === ECONNREFUSED || err.code === ECONNRESET) {
+                    retryToConnectTimeoutID = setTimeout(() => {
+                        arca.once('error', processError);
+                        arca.connect(Number(config.arca.port), config.arca.host);
+                    }, retryToConnectTimeout);
+                    return;
+                }
+                reject(err);
+            };
+
+            arca.once('error', processError);
+            arca.once('error', reject);
+            arca.once('connect', resolve);
+            arca.connect(Number(config.arca.port), config.arca.host);
+        });
+    };
+
+    const disconnect = () => {
+        if (retryToConnectTimeoutID) {
+            clearTimeout(retryToConnectTimeoutID);
+            retryToConnectTimeoutID = null;
+        }
+        arca.end();
+    };
+
+    const request = (request: Request, waitForResponseTimeout: number = 1000): Promise<Response> => {
+        return new Promise<Response>(async (
+            resolve: (value: Response | PromiseLike<Response>) => void,
+            reject: (reason: NodeJS.ErrnoException) => void,
+        ) => {
+            arca.once('error', reject);
+            arca.write(`${JSON.stringify(request)}\n`);
+
+            try {
+                const response = await bus.getResponseByID(request.ID, waitForResponseTimeout);
+                resolve(response);
+            } catch(err) {
+                reject(err);
+            }
+        });
+    };
+
+    return {
+        connect,
+        disconnect,
+        request,
     }
 }

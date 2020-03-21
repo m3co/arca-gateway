@@ -430,7 +430,7 @@ test(`Connect and wait - got a response and a notification but process only the 
         setTimeout(() => {
             arca.disconnect();
         }, 100);
-    });} catch(err) {
+    })} catch(err) {
         fail(err);
     }
 });
