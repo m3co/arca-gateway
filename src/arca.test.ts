@@ -84,8 +84,26 @@ test('Reconnect and process the request', async () => {
 });
 
 test(`Two responses in 1 parts`, async () => {
-    try {
-        const arca = new Arca();
+    try { await new Promise(async (resolve) => {
+        const expectedNotification = {
+            "Context": {
+                "Source": "test",
+            },
+            "Error": null,
+            "ID": "",
+            "Method": "error-in-the-middle",
+            "Result": {
+                "Message": "this is the message",
+            },
+        };
+
+        const onNotification = (notification: Response) => {
+            expect(notification).toStrictEqual(expectedNotification);
+            resolve();
+            arca.disconnect();
+        }
+
+        const arca = new Arca({onNotification});
         arca.config.arca.port = '22346'
 
         const id = 'id-of-error';
@@ -102,30 +120,32 @@ test(`Two responses in 1 parts`, async () => {
         const response = await arca.request(request);
         expect(response.ID).toBe(id);
 
-        for await(const extraResponse of arca.responses()) {
-            expect(extraResponse).toStrictEqual({
-                "Context": {
-                    "Source": "test",
-                },
-                "Error": null,
-                "ID": "something else",
-                "Method": "error-in-the-middle",
-                "Result": {
-                    "Message": "this is the message",
-                },
-            });
-            break;
-        }
-
-        arca.disconnect();
-    } catch(err) {
+    })} catch(err) {
         fail(err);
     }
 });
 
 test(`Two responses in 2 parts - first response broken, second response ok`, async () => {
-    try {
-        const arca = new Arca();
+    try { await new Promise(async (resolve) => {
+        const expectedNotification = {
+            "Context": {
+                "Source": "test",
+            },
+            "Error": null,
+            "ID": "",
+            "Method": "error-in-the-middle",
+            "Result": {
+                "Message": "this is the message",
+            },
+        };
+
+        const onNotification = (notification: Response) => {
+            expect(notification).toStrictEqual(expectedNotification);
+            resolve();
+            arca.disconnect();
+        }
+
+        const arca = new Arca({onNotification});
         arca.config.arca.port = '22346'
 
         const id = 'id-of-error';
@@ -142,30 +162,32 @@ test(`Two responses in 2 parts - first response broken, second response ok`, asy
         const response = await arca.request(request);
         expect(response.ID).toBe(id);
 
-        for await(const extraResponse of arca.responses()) {
-            expect(extraResponse).toStrictEqual({
-                "Context": {
-                    "Source": "test",
-                },
-                "Error": null,
-                "ID": "something else",
-                "Method": "error-in-the-middle",
-                "Result": {
-                    "Message": "this is the message",
-                },
-            });
-            break;
-        }
-
-        arca.disconnect();
-    } catch(err) {
+    })} catch(err) {
         fail(err);
     }
 });
 
 test(`Two responses in 2 parts - first response ok, second response broken`, async () => {
-    try {
-        const arca = new Arca();
+    try { await new Promise(async (resolve) => {
+        const expectedNotification = {
+            "Context": {
+                "Source": "test",
+            },
+            "Error": null,
+            "ID": "",
+            "Method": "error-in-the-middle",
+            "Result": {
+                "Message": "this is the message",
+            },
+        };
+
+        const onNotification = (notification: Response) => {
+            expect(notification).toStrictEqual(expectedNotification);
+            resolve();
+            arca.disconnect();
+        }
+
+        const arca = new Arca({onNotification});
         arca.config.arca.port = '22346'
 
         const id = 'id-of-error';
@@ -182,30 +204,32 @@ test(`Two responses in 2 parts - first response ok, second response broken`, asy
         const response = await arca.request(request);
         expect(response.ID).toBe(id);
 
-        for await(const extraResponse of arca.responses()) {
-            expect(extraResponse).toStrictEqual({
-                "Context": {
-                    "Source": "test",
-                },
-                "Error": null,
-                "ID": "something else",
-                "Method": "error-in-the-middle",
-                "Result": {
-                    "Message": "this is the message",
-                },
-            });
-            break;
-        }
-
-        arca.disconnect();
-    } catch(err) {
+    })} catch(err) {
         fail(err);
     }
 });
 
 test(`Two responses in 2 parts - first response broken, second response broken`, async () => {
-    try {
-        const arca = new Arca();
+    try { await new Promise(async (resolve) => {
+        const expectedNotification = {
+            "Context": {
+                "Source": "test",
+            },
+            "Error": null,
+            "ID": "",
+            "Method": "error-in-the-middle",
+            "Result": {
+                "Message": "this is the message",
+            },
+        };
+
+        const onNotification = (notification: Response) => {
+            expect(notification).toStrictEqual(expectedNotification);
+            resolve();
+            arca.disconnect();
+        }
+
+        const arca = new Arca({onNotification});
         arca.config.arca.port = '22346'
 
         const id = 'id-of-error';
@@ -222,30 +246,32 @@ test(`Two responses in 2 parts - first response broken, second response broken`,
         const response = await arca.request(request);
         expect(response.ID).toBe(id);
 
-        for await(const extraResponse of arca.responses()) {
-            expect(extraResponse).toStrictEqual({
-                "Context": {
-                    "Source": "test",
-                },
-                "Error": null,
-                "ID": "something else",
-                "Method": "error-in-the-middle",
-                "Result": {
-                    "Message": "this is the message",
-                },
-            });
-            break;
-        }
-
-        arca.disconnect();
-    } catch(err) {
+    })} catch(err) {
         fail(err);
     }
 });
 
 test(`Two responses in 2 parts - first response ok(no EOL), second response broken`, async () => {
-    try {
-        const arca = new Arca();
+    try { await new Promise(async (resolve) => {
+        const expectedNotification = {
+            "Context": {
+                "Source": "test",
+            },
+            "Error": null,
+            "ID": "",
+            "Method": "error-in-the-middle",
+            "Result": {
+                "Message": "this is the message",
+            },
+        };
+
+        const onNotification = (notification: Response) => {
+            expect(notification).toStrictEqual(expectedNotification);
+            resolve();
+            arca.disconnect();
+        }
+
+        const arca = new Arca({onNotification});
         arca.config.arca.port = '22346'
 
         const id = 'id-of-error';
@@ -262,30 +288,8 @@ test(`Two responses in 2 parts - first response ok(no EOL), second response brok
         const response = await arca.request(request);
         expect(response.ID).toBe(id);
 
-        let i = 0;
-        for await(const extraResponse of arca.responses()) {
-            expect(extraResponse).toStrictEqual({
-                "Context": {
-                    "Source": "test",
-                },
-                "Error": null,
-                "ID": "something else",
-                "Method": "error-in-the-middle",
-                "Result": {
-                    "Message": "this is the message",
-                },
-            });
-            i++;
-            if (i > 1) {
-                fail(new Error('Unexpected execution. Got extraResponses'));
-            }
-        }
-        arca.disconnect();
-    } catch(err) {
-        const error = err as Error;
-        if (error.message !== 'Timeout at getResponses()') {
-            fail(err);
-        }
+    })} catch(err) {
+        fail(err);
     }
 });
 
@@ -327,8 +331,26 @@ test('Three requests', async () => {
 });
 
 test(`One request - a response and a notification`, async () => {
-    try {
-        const arca = new Arca();
+    try { await new Promise(async (resolve) => {
+        const expectedNotification = {
+            "Context": {
+                "Source": "test",
+            },
+            "Error": null,
+            "ID": "",
+            "Method": "notification-sent",
+            "Result": {
+                "Message": "this is the message 1",
+            },
+        };
+
+        const onNotification = (notification: Response) => {
+            expect(notification).toStrictEqual(expectedNotification);
+            resolve();
+            arca.disconnect();
+        }
+
+        const arca = new Arca({onNotification});
         arca.config.arca.port = '22346'
 
         const id = 'id-of-error';
@@ -345,23 +367,7 @@ test(`One request - a response and a notification`, async () => {
         const response = await arca.request(request);
         expect(response.ID).toBe(id);
 
-        for await(const extraResponse of arca.responses()) {
-            expect(extraResponse).toStrictEqual({
-                "Context": {
-                    "Source": "test",
-                },
-                "Error": null,
-                "ID": "",
-                "Method": "notification-sent",
-                "Result": {
-                    "Message": "this is the message 1",
-                },
-            });
-            break;
-        }
-
-        arca.disconnect();
-    } catch(err) {
+    })} catch(err) {
         fail(err);
     }
 });
@@ -369,38 +375,35 @@ test(`One request - a response and a notification`, async () => {
 // This is an error. Never a response will come without sending a request!
 // but, who knows!
 test(`Connect and wait - got a response and a notification`, async () => {
-    try {
-        const arca = new Arca();
+    try { await new Promise(async (resolve, reject) => {
+        let i = 0;
+        const expectedNotification = {
+            ID: '',
+            Method: 'notification',
+            Context: { Source: 'test' },
+            Result: { Message: 'this is the message' },
+            Error: null
+        };
+
+        const onNotification = (notification: Response) => {
+            i++;
+            if (i > 1) {
+                reject(new Error('unexepected notification'));
+                return;
+            }
+            expect(notification).toStrictEqual(expectedNotification);
+        }
+
+        const arca = new Arca({onNotification});
         arca.config.arca.port = '22347'
 
         await arca.connect();
-        const expectedResponses = [
-            {
-                ID: 'id-request',
-                Method: 'requested',
-                Context: { Source: 'test' },
-                Result: { Message: 'this is the message' },
-                Error: null
-            },
-            {
-                ID: '',
-                Method: 'notification',
-                Context: { Source: 'test' },
-                Result: { Message: 'this is the message' },
-                Error: null
-            }
-        ];
-        let i = 0;
-        for await(const response of arca.responses()) {
-            expect(response).toStrictEqual(expectedResponses[i]);
-            i++;
-            if (i > 2) {
-                fail(new Error('Unexpected execution. Got extraResponses'));
-            }
-        }
+        setTimeout(() => {
+            resolve();
+            arca.disconnect();
+        }, 300);
 
-        arca.disconnect();
-    } catch(err) {
+    })} catch(err) {
         const error = err as Error;
         if (error.message !== 'Timeout at getResponses()') {
             fail(err);

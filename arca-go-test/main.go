@@ -114,7 +114,7 @@ func handleRequest(conn net.Conn) {
 	}
 
 	if request.Method == "2-msg-in-1-parts" {
-		response.ID = "something else"
+		response.ID = ""
 		responseMsg2, _ := json.Marshal(response)
 		twoMessages := fmt.Sprintf("%s\n%s", string(responseMsg), string(responseMsg2))
 		fmt.Println(twoMessages, "esto son dos mensajes a la vez")
@@ -122,7 +122,7 @@ func handleRequest(conn net.Conn) {
 	}
 
 	if request.Method == "2-msg-in-2-parts-where-1-break-2-ok" {
-		response.ID = "something else"
+		response.ID = ""
 		responseMsg2, _ := json.Marshal(response)
 		twoMessages := []byte(fmt.Sprintf("%s\n%s", string(responseMsg), string(responseMsg2)))
 
@@ -140,7 +140,7 @@ func handleRequest(conn net.Conn) {
 	}
 
 	if request.Method == "2-msg-in-2-parts-where-1-ok-2-break" {
-		response.ID = "something else"
+		response.ID = ""
 		responseMsg2, _ := json.Marshal(response)
 		twoMessages := []byte(fmt.Sprintf("%s\n%s", string(responseMsg), string(responseMsg2)))
 
@@ -158,7 +158,7 @@ func handleRequest(conn net.Conn) {
 	}
 
 	if request.Method == "2-msg-in-2-parts-where-1-break-2-break" {
-		response.ID = "something else"
+		response.ID = ""
 		responseMsg2, _ := json.Marshal(response)
 		twoMessages := []byte(fmt.Sprintf("%s\n%s", string(responseMsg), string(responseMsg2)))
 
@@ -183,7 +183,7 @@ func handleRequest(conn net.Conn) {
 	}
 
 	if request.Method == "2-msg-in-2-parts-where-1-ok-noEOL-2-break" {
-		response.ID = "something else"
+		response.ID = ""
 		responseMsg2, _ := json.Marshal(response)
 		twoMessages := []byte(fmt.Sprintf("%s\n%s", string(responseMsg), string(responseMsg2)))
 
