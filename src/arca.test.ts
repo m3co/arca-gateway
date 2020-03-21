@@ -366,5 +366,45 @@ test(`One request - a response and a notification`, async () => {
         fail(err);
     }
 });
-// Probar
-// Esperar 2 Responses
+
+// This is an error. Never a response will come without sending a request!
+// but, who knows!
+test(`Connect and wait - got a response and a notification`, async () => {
+    try {
+        const arca = new Arca();
+        arca.config.arca.port = '22347'
+
+        await arca.connect();
+        const expectedResponses = [
+            {
+                ID: 'id-request',
+                Method: 'requested',
+                Context: { Source: 'test' },
+                Result: { Message: 'this is the message' },
+                Error: null
+            },
+            {
+                ID: '',
+                Method: 'notification',
+                Context: { Source: 'test' },
+                Result: { Message: 'this is the message' },
+                Error: null
+            }
+        ];
+        let i = 0;
+        for await(const response of arca.responses()) {
+            expect(response).toStrictEqual(expectedResponses[i]);
+            i++;
+            if (i > 2) {
+                fail(new Error('Unexpected execution. Got extraResponses'));
+            }
+        }
+
+        arca.disconnect();
+    } catch(err) {
+        const error = err as Error;
+        if (error.message !== 'Timeout at getResponses()') {
+            fail(err);
+        }
+    }
+});

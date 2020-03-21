@@ -13,6 +13,8 @@ export class Arca {
         Promise.reject(new Error('define getResponseByID internally'));
     private getResponses: ((waitForResponseTimeout: number) => Promise<Response[]>) = () =>
         Promise.reject(new Error('define getResponses internally'));
+    private getNotifications: (() => Promise<Response[]>) = () =>
+        Promise.reject(new Error('define getNotifications internally'));
 
     public config: {
         [key: string]: {
@@ -96,6 +98,15 @@ export class Arca {
         while (true) {
             for (const response of await getResponses(waitForResponseTimeout)) {
                 yield response;
+            }
+        }
+    }
+
+    async *notifications() {
+        const { getNotifications } = this;
+        while (true) {
+            for (const notification of await getNotifications()) {
+                yield notification;
             }
         }
     }

@@ -33,12 +33,13 @@ export const prepareHandler = (): {
     handler: (data: Buffer) => void,
     getResponseByID: (ID: string, waitForResponseTimeout: number) => Promise<Response>,
     getResponses: (waitForResponseTimeout: number) => Promise<Response[]>,
+    getNotifications: () => Promise<Response[]>,
 } => {
     let callbacks: (() => void)[] = [];
     let responseQueue: Response[] = [];
 
-    function clear(timeout: NodeJS.Timeout, currentCallback: () => void) {
-        clearTimeout(timeout);
+    function clear(currentCallback: () => void, timeout?: NodeJS.Timeout) {
+        (timeout !== undefined) && clearTimeout(timeout);
         callbacks = callbacks.filter(callback => callback !== currentCallback);
     }
 
@@ -54,7 +55,7 @@ export const prepareHandler = (): {
                 responseQueue = responseQueue.filter((response: Response): boolean => {
                     if (response.ID === ID) {
                         resolve(response);
-                        clear(timeout, callback);
+                        clear(callback, timeout);
                         return false;
                     }
                     return true;
@@ -79,7 +80,26 @@ export const prepareHandler = (): {
                 const callback = () => {
                     resolve([...responseQueue]);
                     responseQueue.length = 0;
-                    clear(timeout, callback);
+                    clear(callback, timeout);
+                };
+                callbacks.push(callback);
+            }
+        });
+    }
+
+    const getNotifications = (): Promise<Response[]> => {
+        return new Promise<Response[]>((
+            resolve: (value: Response[] | PromiseLike<Response[]>) => void,
+            reject: (reason: Error) => void,
+        ) => {
+            if (responseQueue.length) {
+                resolve([...responseQueue]);
+                responseQueue.length = 0;
+            } else {
+                const callback = () => {
+                    resolve([...responseQueue]);
+                    responseQueue.length = 0;
+                    clear(callback);
                 };
                 callbacks.push(callback);
             }
@@ -96,5 +116,6 @@ export const prepareHandler = (): {
         }),
         getResponseByID,
         getResponses,
+        getNotifications,
     }
 }

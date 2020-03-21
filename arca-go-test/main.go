@@ -246,11 +246,73 @@ func runserverApart() {
 	}
 }
 
+// Handles incoming requests.
+func handleRequest2(conn net.Conn) {
+	// Make a buffer to hold incoming data.
+	response := jsonrpc.Response{}
+	response.ID = "id-request"
+	response.Method = "error-in-the-middle"
+	response.Context = map[string]string{
+		"Source": "test",
+	}
+	response.Result = map[string]string{
+		"Message": "this is the message",
+	}
+
+	time.Sleep(100 * time.Millisecond)
+	func() {
+		response.Method = "requested"
+		responseMsg, _ := json.Marshal(response)
+		conn.Write(responseMsg)
+		conn.Write(([]byte("\n")))
+	}()
+
+	func() {
+		response.ID = ""
+		response.Method = "notification"
+		responseMsg, _ := json.Marshal(response)
+		conn.Write(responseMsg)
+		conn.Write(([]byte("\n")))
+	}()
+
+	time.Sleep(10 * time.Second)
+	conn.Close()
+}
+
+func runserverApart2() {
+	const (
+		connHost = ""
+		connPort = "22347"
+		connType = "tcp"
+	)
+	l, err := net.Listen(connType, connHost+":"+connPort)
+	if err != nil {
+		fmt.Println("Error listening:", err.Error())
+		return
+	}
+	// Close the listener when the application closes.
+	defer l.Close()
+	fmt.Println("Listening on " + connHost + ":" + connPort)
+	for {
+		// Listen for an incoming connection.
+		fmt.Println("listening............")
+		conn, err := l.Accept()
+		fmt.Println("............connected")
+		if err != nil {
+			fmt.Println("Error accepting: ", err.Error())
+			return
+		}
+		// Handle connections in a new goroutine.
+		go handleRequest2(conn)
+	}
+}
+
 func main() {
 	server := dbbus.Server{}
 	done := make(chan bool)
 
 	go runserverApart()
+	go runserverApart2()
 
 	go (func() {
 		err := server.Start()
