@@ -34,5 +34,4 @@ export class Arca {
         this.disconnect = API.disconnect;
         this.request = API.request;
     }
-
 }
