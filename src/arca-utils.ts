@@ -29,10 +29,10 @@ const processData = (bus: {
     }
 }
 
-export const prepareHandler = (waitForResponseTimeout: number = 1000): {
+export const prepareHandler = (): {
     handler: (data: Buffer) => void,
-    getResponseByID: (ID: string) => Promise<Response>,
-    getResponses: () => Promise<Response[]>,
+    getResponseByID: (ID: string, waitForResponseTimeout: number) => Promise<Response>,
+    getResponses: (waitForResponseTimeout: number) => Promise<Response[]>,
 } => {
     let callbacks: (() => void)[] = [];
     let responseQueue: Response[] = [];
@@ -42,7 +42,7 @@ export const prepareHandler = (waitForResponseTimeout: number = 1000): {
         callbacks = callbacks.filter(callback => callback !== currentCallback);
     }
 
-    const getResponseByID = (ID: string): Promise<Response> => {
+    const getResponseByID = (ID: string, waitForResponseTimeout: number = 1000): Promise<Response> => {
         return new Promise<Response>((
             resolve: (value: Response | PromiseLike<Response>) => void,
             reject: (reason: Error) => void,
@@ -64,7 +64,7 @@ export const prepareHandler = (waitForResponseTimeout: number = 1000): {
         });
     }
 
-    const getResponses = (): Promise<Response[]> => {
+    const getResponses = (waitForResponseTimeout: number = 1000): Promise<Response[]> => {
         return new Promise<Response[]>((
             resolve: (value: Response[] | PromiseLike<Response[]>) => void,
             reject: (reason: Error) => void,

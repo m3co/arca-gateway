@@ -11,7 +11,7 @@ export class Arca {
     private retryToConnectTimeoutID: NodeJS.Timeout | null = null;
     private getResponseByID: ((ID: string, waitForResponseTimeout: number) => Promise<Response>) = () =>
         Promise.reject(new Error('define getResponseByID internally'));
-    private getResponses: (() => Promise<Response[]>) = () =>
+    private getResponses: ((waitForResponseTimeout: number) => Promise<Response[]>) = () =>
         Promise.reject(new Error('define getResponses internally'));
 
     public config: {
@@ -91,9 +91,10 @@ export class Arca {
         });
     }
 
-    async *responses() {
+    async *responses(waitForResponseTimeout: number = 1000) {
+        const { getResponses } = this;
         while (true) {
-            for (const response of await this.getResponses()) {
+            for (const response of await getResponses(waitForResponseTimeout)) {
                 yield response;
             }
         }
