@@ -13,8 +13,6 @@ export class Arca {
         Promise.reject(new Error('define getResponseByID internally'));
     private getResponses: ((waitForResponseTimeout: number) => Promise<Response[]>) = () =>
         Promise.reject(new Error('define getResponses internally'));
-    private getNotifications: (() => Promise<Response[]>) = () =>
-        Promise.reject(new Error('define getNotifications internally'));
 
     public config: {
         [key: string]: {
@@ -22,14 +20,22 @@ export class Arca {
         };
     } = {};
 
-    constructor(configLocation: string = 'config.ini') {
+    constructor(params?: {
+        configLocation?: string,
+        onNotification?: (response: Response) => void,
+    }) {
+        const defaultParams = {
+            configLocation: 'config.ini',
+            onNotification: (notification: Response) => {}
+        };
+
+        const { configLocation, onNotification } = {...defaultParams, ...(params || {})};
         const config = parse(readFileSync(configLocation, 'utf-8'));
         const arca = new Socket();
         arca.setEncoding('utf-8');
-        const bus = prepareHandler();
+        const bus = prepareHandler(onNotification);
         this.getResponseByID = bus.getResponseByID;
         this.getResponses = bus.getResponses;
-        this.getNotifications = bus.getNotifications;
         arca.on('data', bus.handler);
 
         this.arca = arca;
@@ -99,15 +105,6 @@ export class Arca {
         while (true) {
             for (const response of await getResponses(waitForResponseTimeout)) {
                 yield response;
-            }
-        }
-    }
-
-    async *notifications() {
-        const { getNotifications } = this;
-        while (true) {
-            for (const notification of await getNotifications()) {
-                yield notification;
             }
         }
     }

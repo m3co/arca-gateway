@@ -1,8 +1,7 @@
 
 import { Arca } from './index';
-import { Request } from './types';
+import { Request, Response } from './types';
 import { v4 as uuidv4 } from 'uuid';
-import { connect } from 'net'
 
 test('Send a first simple request', async () => {
     try {
@@ -409,56 +408,28 @@ test(`Connect and wait - got a response and a notification`, async () => {
     }
 });
 
-test(`Connect and wait - got a response and a notification but await only notifications`, async () => {
-    try {
-        const arca = new Arca();
+test(`Connect and wait - got a response and a notification but process only the notification`, async () => {
+    try { await new Promise(async (resolve) => {
+        const expectedNotification = {
+            ID: '',
+            Method: 'notification',
+            Context: { Source: 'test' },
+            Result: { Message: 'this is the message' },
+            Error: null
+        };
+
+        const onNotification = (notification: Response) => {
+            expect(notification).toStrictEqual(expectedNotification);
+            resolve();
+        }
+        const arca = new Arca({onNotification});
         arca.config.arca.port = '22347'
 
         await arca.connect();
-        const expectedNotifications = [
-            {
-                ID: '',
-                Method: 'notification',
-                Context: { Source: 'test' },
-                Result: { Message: 'this is the message' },
-                Error: null
-            }
-        ];
-
-        const expectedResponses = [
-            {
-                ID: 'id-request',
-                Method: 'requested',
-                Context: { Source: 'test' },
-                Result: { Message: 'this is the message' },
-                Error: null
-            }
-        ];
-
-        let i = 0;
-        for await(const notification of arca.notifications()) {
-            if (notification.ID) {
-                fail(new Error('Unexpected execution. Got something strange'));
-            } else {
-                expect(notification).toStrictEqual(expectedNotifications[i]);
-                break;
-            }
-        }
-
-        i = 0;
-        for await(const response of arca.responses()) {
-            expect(response).toStrictEqual(expectedResponses[i]);
-            i++;
-            if (i > 1) {
-                fail(new Error('Unexpected execution. Got extraResponses'));
-            }
-        }
-
-        arca.disconnect();
-    } catch(err) {
-        const error = err as Error;
-        if (error.message !== 'Timeout at getResponses()') {
-            fail(err);
-        }
+        setTimeout(() => {
+            arca.disconnect();
+        }, 100);
+    });} catch(err) {
+        fail(err);
     }
 });

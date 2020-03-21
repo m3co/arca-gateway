@@ -29,11 +29,10 @@ const processData = (bus: {
     }
 }
 
-export const prepareHandler = (): {
+export const prepareHandler = (onNotification: (response: Response) => void): {
     handler: (data: Buffer) => void,
     getResponseByID: (ID: string, waitForResponseTimeout: number) => Promise<Response>,
     getResponses: (waitForResponseTimeout: number) => Promise<Response[]>,
-    getNotifications: () => Promise<Response[]>,
 } => {
     let callbacks: (() => void)[] = [];
     let responseQueue: Response[] = [];
@@ -89,49 +88,20 @@ export const prepareHandler = (): {
         });
     }
 
-    const getNotifications = (): Promise<Response[]> => {
-        return new Promise<Response[]>((
-            resolve: (value: Response[] | PromiseLike<Response[]>) => void,
-            reject: (reason: Error) => void,
-        ) => {
-            function action() {
-                const filtred = responseQueue.reduce((acc, curr) => {
-                    if (curr.ID) {
-                        acc.responses.push(curr);
-                    } else {
-                        acc.notifications.push(curr);
-                    }
-                    return acc;
-                }, {
-                    notifications: [] as Response[],
-                    responses: [] as Response[],
-                });
-                resolve(filtred.notifications);
-                responseQueue.length = 0;
-                //responseQueue.push(...filtred.responses); // I've to log this error
-            }
-            if (responseQueue.length) {
-                action();
-            } else {
-                const callback = () => {
-                    action();
-                    clear(callback);
-                };
-                callbacks.push(callback);
-            }
-        });
-    }
-
     return {
         handler: processData({
             processResponses: (responses: Response[]): void => {
-                responseQueue.push(...responses);
+                responses.forEach(response => {
+                    if (response.ID == '') {
+                        onNotification(response);
+                    }
+                    responseQueue.push(response);
+                });
                 callbacks.forEach(callback => callback());
             },
             bufferMsg: '',
         }),
         getResponseByID,
         getResponses,
-        getNotifications,
     }
 }
