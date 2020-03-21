@@ -424,6 +424,17 @@ test(`Connect and wait - got a response and a notification but await only notifi
                 Error: null
             }
         ];
+
+        const expectedResponses = [
+            {
+                ID: 'id-request',
+                Method: 'requested',
+                Context: { Source: 'test' },
+                Result: { Message: 'this is the message' },
+                Error: null
+            }
+        ];
+
         let i = 0;
         for await(const notification of arca.notifications()) {
             if (notification.ID) {
@@ -431,6 +442,15 @@ test(`Connect and wait - got a response and a notification but await only notifi
             } else {
                 expect(notification).toStrictEqual(expectedNotifications[i]);
                 break;
+            }
+        }
+
+        i = 0;
+        for await(const response of arca.responses()) {
+            expect(response).toStrictEqual(expectedResponses[i]);
+            i++;
+            if (i > 1) {
+                fail(new Error('Unexpected execution. Got extraResponses'));
             }
         }
 
