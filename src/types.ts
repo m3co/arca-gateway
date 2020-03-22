@@ -5,6 +5,7 @@ export const errorUnexpectedEndJSONInput = 'Unexpected end of JSON input'.toLowe
 
 export interface Response {
     ID: string;
+    Method: string;
     Context: {
         Source: string;
         Target: string;
@@ -23,6 +24,9 @@ export interface Request {
     ID: string,
     Method: string,
     Context: {
-        [key:string]: string;
+        [key:string]: any;
+    },
+    Params?: {
+        [key: string]: any;
     }
 }
