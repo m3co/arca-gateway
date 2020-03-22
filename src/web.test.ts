@@ -7,7 +7,7 @@ import { Arca } from './arca';
 
 test('Check the connection', async () => {
     await new Promise((resolve) => {
-        const web = new Web();
+        const web = new Web({ arca: new Arca() });
         const client = SocketIO(`http://localhost:${web.config.port}/`);
 
         client.on('connect', () => {
@@ -24,15 +24,16 @@ test('Check the connection', async () => {
 // surely this test will delete soon...
 test('Send a request, await a response', async () => {
     await new Promise((resolve) => {
-        const web = new Web();
+        const web = new Web({ arca: new Arca() });
         const client = SocketIO(`http://localhost:${web.config.port}/`);
+        const id = 'an-ID';
 
         client.on('connect', () => {
-            client.emit('jsonrpc', { ID: 'an-ID', Method: 'A request' });
+            client.emit('jsonrpc', { ID: id, Method: 'A request' });
         });
 
         client.on('jsonrpc', (res: any) => {
-            expect(res).toStrictEqual({ ID: 'an-ID', Method: 'A response' });
+            expect(res).toStrictEqual({ ID: id, Method: 'A response' });
             teardown();
         })
 
@@ -50,7 +51,7 @@ test('Send a request, await a response', async () => {
 // surely this test will delete soon...
 test('Send a request, await a response from an "Arca" instance', async () => {
     const arca = new Arca();
-    const web = new Web();
+    const web = new Web({ arca });
     const client = SocketIO(`http://localhost:${web.config.port}/`);
 
     function teardown() {
