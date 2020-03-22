@@ -47,6 +47,8 @@ test('Check the connection', async () => {
         await web.listen();
         client.connect();
     }); } catch(err) {
+        client.disconnect();
+        web.close();
         fail(err);
     }
 
@@ -74,6 +76,46 @@ test('Send some requests, await for their responses from an "Arca" instance', as
 
         resolve();
     }); } catch(err) {
+        teardown();
+        fail(err);
+    }
+    teardown();
+});
+
+test('Send an incorrect request and fail', async () => {
+    const arca = new Arca();
+    const web = new Web({ arca });
+    const client = SocketIO(`http://localhost:${web.config.port}/`);
+
+    function teardown() {
+        client.disconnect();
+        web.close();
+    }
+
+    try { await new Promise(async (resolve) => {
+        await web.listen();
+        client.connect();
+
+        await new Promise(resolve => {
+            const request = 'something incorrect';
+            const expectedResponse = {
+                Method: 'socket.on::jsonrpc',
+                Error: {
+                    Code: -32700,
+                    Message: 'Parse error',
+                }
+            };
+
+            client.emit('jsonrpc', request);
+            client.once('jsonrpc', (res: any) => {
+                expect(res).toStrictEqual(expectedResponse);
+                resolve();
+            });
+        });
+
+        resolve();
+    }); } catch(err) {
+        teardown();
         fail(err);
     }
     teardown();

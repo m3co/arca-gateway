@@ -4,7 +4,7 @@ export const ECONNREFUSED = 'ECONNREFUSED';
 export const errorUnexpectedEndJSONInput = 'Unexpected end of JSON input'.toLowerCase();
 
 export interface Response {
-    ID: string;
+    ID?: string;
     Method: string;
     Context: {
         Source: string;

@@ -4,6 +4,8 @@ import { parse } from 'ini';
 import * as SocketIO from 'socket.io';
 
 import { Arca } from './arca';
+import { Request, Response } from './types';
+
 
 export class Web {
     public config: {
@@ -32,9 +34,20 @@ export class Web {
         const { arca, io, config } = this;
 
         io.on('connect', (socket: SocketIO.Socket) => {
-            socket.on('jsonrpc', async (req: any) => {
-                const response = await arca.request(req);
-                socket.emit('jsonrpc', response);
+            socket.on('jsonrpc', async (request: Request) => {
+                if (request instanceof Object) {
+                    const response = await arca.request(request);
+                    socket.emit('jsonrpc', response);
+                } else {
+                    const responseError = {
+                        Method: 'socket.on::jsonrpc',
+                        Error: {
+                            Code: -32700,
+                            Message: 'Parse error',
+                        }
+                    };
+                    socket.emit('jsonrpc', responseError);
+                }
             })
         });
 
