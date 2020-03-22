@@ -5,6 +5,36 @@ import { Web } from './index';
 import { v4 as uuidv4 } from 'uuid';
 import { Arca } from './arca';
 
+function generateRequestAndResponse() {
+    const id = uuidv4();
+    const request = {
+        ID: id,
+        Method: 'test',
+        Context: {
+            Source: 'test-source'
+        },
+    };
+    const expectedResponse = {
+        ID: id,
+        Method: 'test',
+        Context: { Source: 'test-source' },
+        Result: { success: 'indeed' },
+        Error: null,
+    }
+    return { request, expectedResponse };
+}
+
+function launchRequestWaitResponse(client: SocketIOClient.Socket) {
+    return new Promise((resolve) => {
+        const { request, expectedResponse } = generateRequestAndResponse();
+        client.emit('jsonrpc', request);
+        client.once('jsonrpc', (res: any) => {
+            expect(res).toStrictEqual(expectedResponse);
+            resolve();
+        })
+    });
+}
+
 test('Check the connection', async () => {
     const web = new Web({ arca: new Arca() });
     const client = SocketIO(`http://localhost:${web.config.port}/`);
@@ -24,8 +54,7 @@ test('Check the connection', async () => {
     web.close();
 });
 
-// surely this test will delete soon...
-test('Send a request, await a response from an "Arca" instance', async () => {
+test('Send some requests, await for their responses from an "Arca" instance', async () => {
     const arca = new Arca();
     const web = new Web({ arca });
     const client = SocketIO(`http://localhost:${web.config.port}/`);
@@ -36,37 +65,16 @@ test('Send a request, await a response from an "Arca" instance', async () => {
     }
 
     try { await new Promise(async (resolve) => {
-        await arca.connect();
-        const id = uuidv4();
-        const request = {
-            ID: id,
-            Method: 'test',
-            Context: {
-                Source: 'test-source'
-            },
-        };
-        const expectedResponse = {
-            ID: id,
-            Method: 'test',
-            Context: { Source: 'test-source' },
-            Result: { success: 'indeed' },
-            Error: null,
-        }
-
-        client.on('connect', () => {
-            client.emit('jsonrpc', request);
-        });
-
-        client.on('jsonrpc', (res: any) => {
-            expect(res).toStrictEqual(expectedResponse);
-            resolve();
-        })
-
         await web.listen();
         client.connect();
+
+        await launchRequestWaitResponse(client);
+        await launchRequestWaitResponse(client);
+        await launchRequestWaitResponse(client);
+
+        resolve();
     }); } catch(err) {
         fail(err);
     }
-
     teardown();
 });
