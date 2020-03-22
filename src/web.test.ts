@@ -1,6 +1,9 @@
 
-import { Web } from './index';
 import * as SocketIO from 'socket.io-client';
+
+import { Web } from './index';
+import { v4 as uuidv4 } from 'uuid';
+import { Arca } from './arca';
 
 test('Check the connection', async () => {
     await new Promise((resolve) => {
@@ -18,6 +21,7 @@ test('Check the connection', async () => {
     });
 });
 
+// surely this test will delete soon...
 test('Send a request, await a response', async () => {
     await new Promise((resolve) => {
         const web = new Web();
@@ -41,4 +45,48 @@ test('Send a request, await a response', async () => {
             resolve();
         }
     });
+});
+
+// surely this test will delete soon...
+test('Send a request, await a response from an "Arca" instance', async () => {
+    const arca = new Arca();
+    const web = new Web();
+    const client = SocketIO(`http://localhost:${web.config.port}/`);
+
+    function teardown() {
+        client.disconnect();
+        web.close();
+        arca.disconnect();
+    }
+
+    try { await new Promise(async (resolve) => {
+        await arca.connect();
+        const id = uuidv4();
+        await arca.connect();
+
+        const request = {
+            ID: id,
+            Method: 'test',
+            Context: {
+                Source: 'test-source'
+            }
+        }
+
+        client.on('connect', () => {
+            client.emit('jsonrpc', request); // this should change to smth like request
+        });
+
+        client.on('jsonrpc', (res: any) => {
+            teardown();
+            expect(res.ID).toStrictEqual(request.ID); // this should be smth like await response
+            resolve();
+        })
+
+        web.listen();
+        client.connect();
+    }); } catch(err) {
+        fail(err);
+    }
+
+    teardown();
 });
