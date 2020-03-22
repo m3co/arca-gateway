@@ -23,6 +23,9 @@ export class Web {
 
         const io = SocketIO();
         io.on('connect', (socket: SocketIO.Socket) => {
+            socket.on('jsonrpc', (req: any) => {
+                socket.emit('jsonrpc', { ID: 'an-ID', Method: 'A response' });
+            })
         });
 
         this.io = io;
