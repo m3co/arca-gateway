@@ -22,29 +22,30 @@ export class Web {
             configLocation: 'config.ini',
         };
         const { configLocation } = {...defaultParams, ...params};
+
+        this.io = SocketIO();
         this.config = parse(readFileSync(configLocation, 'utf-8'));
         this.arca = params.arca;
-
-        const io = SocketIO();
-        io.on('connect', (socket: SocketIO.Socket) => {
-            socket.on('jsonrpc', async (req: any) => {
-                const response = await this.arca.request(req);
-                socket.emit('jsonrpc', response);
-            })
-        });
-
-        this.io = io;
     };
 
     listen(retryToConnectTimeout: number = 1000) {
         const { arca, io, config } = this;
+
+        io.on('connect', (socket: SocketIO.Socket) => {
+            socket.on('jsonrpc', async (req: any) => {
+                const response = await arca.request(req);
+                socket.emit('jsonrpc', response);
+            })
+        });
+
         io.listen(config.port);
         return arca.connect(retryToConnectTimeout);
     };
 
     close() {
-        this.io.close();
-        this.arca.disconnect();
+        const { arca, io } = this;
+        io.close();
+        arca.disconnect();
     };
 
 }
