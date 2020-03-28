@@ -3,6 +3,7 @@ import { Socket } from 'net';
 import { ECONNRESET, ECONNREFUSED,
     errorUnexpectedEndJSONInput,
     Request, Response } from './types';
+import { Arca } from './arca';
 
 const processRows = (msg: string): Response[] => {
     const rows = msg.split('\n').filter((str) => str.length > 0);
@@ -32,7 +33,7 @@ const processData = (bus: {
     }
 }
 
-export const prepareHandler = (onNotification: (response: Response) => void): {
+export const prepareHandler = (obj: Arca): {
     handler: (data: Buffer) => void,
     getResponseByID: (ID: string, waitForResponseTimeout: number) => Promise<Response>,
 } => {
@@ -73,7 +74,7 @@ export const prepareHandler = (onNotification: (response: Response) => void): {
                     if (response.ID) {
                         responseQueue.push(response);
                     } else {
-                        onNotification(response);
+                        obj.onNotification(response);
                     }
                 });
                 callbacks.forEach(callback => callback());
@@ -84,14 +85,15 @@ export const prepareHandler = (onNotification: (response: Response) => void): {
     }
 }
 
-export function defineAPI(config: {
-    [key: string]: any;
-}, onNotification: (response: Response) => void) {
+export function defineAPI(
+    config: { [key: string]: any; },
+    obj: Arca
+) {
     let retryToConnectTimeoutID: NodeJS.Timeout | null;
     const arca = new Socket();
     arca.setEncoding('utf-8');
 
-    const bus = prepareHandler(onNotification);
+    const bus = prepareHandler(obj);
     arca.on('data', bus.handler);
 
     const connect = (retryToConnectTimeout: number = 1000): Promise<void> => {

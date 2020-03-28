@@ -15,21 +15,24 @@ export class Arca {
     public connect: (retryToConnectTimeout?: number) => Promise<void>;
     public disconnect: () => void;
     public request: (request: Request, waitForResponseTimeout?: number) => Promise<Response>;
+    public onNotification: (notification: Response) => void
 
     constructor(params?: {
         configLocation?: string,
-        onNotification?: (response: Response) => void,
+        onNotification?: (notification: Response) => void,
     }) {
         const defaultParams = {
             configLocation: 'config.ini',
-            onNotification: (notification: Response) => {}
+            onNotification: (notification: Response): void => {}
         };
 
         const { configLocation, onNotification } = {...defaultParams, ...(params || {})};
         this.config = parse(readFileSync(configLocation, 'utf-8'));
-        const API = defineAPI(this.config, onNotification);
+        const API = defineAPI(this.config, this);
+        this.onNotification = onNotification;
         this.connect = API.connect;
         this.disconnect = API.disconnect;
         this.request = API.request;
     }
+
 }

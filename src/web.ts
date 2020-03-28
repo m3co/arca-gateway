@@ -34,6 +34,9 @@ export class Web {
         const { arca, io, config } = this;
 
         io.on('connect', (socket: SocketIO.Socket) => {
+            arca.onNotification = (response: Response) => {
+                socket.emit('jsonrpc', response);
+            };
             socket.on('jsonrpc', async (request: Request) => {
                 if (request instanceof Object) {
                     const response = await arca.request(request);

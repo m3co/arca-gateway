@@ -4,6 +4,7 @@ import * as SocketIO from 'socket.io-client';
 import { Web } from './index';
 import { v4 as uuidv4 } from 'uuid';
 import { Arca } from './arca';
+import { Response } from './types';
 
 function generateRequestAndResponse() {
     const id = uuidv4();
@@ -114,6 +115,78 @@ test('Send an incorrect request and fail', async () => {
         });
 
         resolve();
+    }); } catch(err) {
+        teardown();
+        fail(err);
+    }
+    teardown();
+});
+
+test('Send a request, await for its response and a notification', async () => {
+    const arca = new Arca();
+    arca.config.arca.port = '22346';
+
+    const web = new Web({ arca });
+    const client = SocketIO(`http://localhost:${web.config.port}/`);
+
+    function teardown() {
+        client.disconnect();
+        web.close();
+    }
+
+    try { await new Promise(async (resolve) => {
+        await web.listen();
+        client.connect();
+
+        const id = 'id-of-error';
+        const request = {
+            ID: id,
+            Method: `1-request-1-response-1-notification`,
+            Context: {
+                Source: 'test'
+            }
+        };
+        const expectedResponse = {
+            ID: 'id-of-error',
+            Method: 'error-in-the-middle',
+            Context: { Source: 'test' },
+            Result: { Message: 'this is the message' },
+            Error: null
+        };
+        let expectedResponsePassed = false;
+
+        const expectedNotification = {
+            Context: {
+                Source: 'test',
+            },
+            Error: null,
+            ID: '',
+            Method: 'notification-sent',
+            Result: {
+                Message: 'this is the message 1',
+            },
+        };
+        let expectedNotificationPassed = false;
+        let i = 0;
+
+        client.on('jsonrpc', (res: any) => {
+            i++;
+            if (!expectedNotificationPassed) {
+                expect(res).toStrictEqual(expectedNotification);
+                expectedNotificationPassed = true;
+                return;
+            }
+            if (!expectedResponsePassed) {
+                expect(res).toStrictEqual(expectedResponse);
+                expectedResponsePassed = true;
+            }
+
+            if ((i === 2) && expectedResponsePassed && expectedNotificationPassed) {
+                resolve();
+            }
+        });
+
+        client.emit('jsonrpc', request);
     }); } catch(err) {
         teardown();
         fail(err);
