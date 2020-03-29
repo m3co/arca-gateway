@@ -279,3 +279,89 @@ test('Check request to subscribe to Target', async () => {
     }
     teardown();
 });
+
+test('Check request to unsubscribe to Source', async () => {
+    const arca = new Arca();
+    arca.config.arca.port = '22346';
+
+    const web = new Web({ arca });
+    const client = SocketIO(`http://localhost:${web.config.port}/`);
+
+    function teardown() {
+        client.disconnect();
+        web.close();
+    }
+
+    try { await new Promise(async (resolve) => {
+       const request = {
+            ID: 'id-of-error',
+            Method: 'unsubscribe',
+            Params: {
+                Source: 'test'
+            }
+        };
+
+        const expectedResponse = {
+            ID: 'id-of-error',
+            Method: 'unsubscribe',
+            Context: { Source: 'test' },
+            Result: true
+        };
+
+        client.on('jsonrpc', (res: any) => {
+            expect(res).toStrictEqual(expectedResponse);
+            resolve();
+        });
+
+        await web.listen();
+        client.connect();
+        client.emit('jsonrpc', request);
+    }); } catch(err) {
+        teardown();
+        fail(err);
+    }
+    teardown();
+});
+
+test('Check request to unsubscribe to Target', async () => {
+    const arca = new Arca();
+    arca.config.arca.port = '22346';
+
+    const web = new Web({ arca });
+    const client = SocketIO(`http://localhost:${web.config.port}/`);
+
+    function teardown() {
+        client.disconnect();
+        web.close();
+    }
+
+    try { await new Promise(async (resolve) => {
+       const request = {
+            ID: 'id-of-error',
+            Method: 'unsubscribe',
+            Params: {
+                Target: 'test'
+            }
+        };
+
+        const expectedResponse = {
+            ID: 'id-of-error',
+            Method: 'unsubscribe',
+            Context: { Target: 'test' },
+            Result: true
+        };
+
+        client.on('jsonrpc', (res: any) => {
+            expect(res).toStrictEqual(expectedResponse);
+            resolve();
+        });
+
+        await web.listen();
+        client.connect();
+        client.emit('jsonrpc', request);
+    }); } catch(err) {
+        teardown();
+        fail(err);
+    }
+    teardown();
+});

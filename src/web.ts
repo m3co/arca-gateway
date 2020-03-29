@@ -46,7 +46,8 @@ export class Web {
             clients[socket.id] = socket;
             socket.on('jsonrpc', async (request: Request) => {
                 if (request instanceof Object) {
-                    if (request.Method === 'subscribe') {
+                    if ((request.Method === 'subscribe') ||
+                        (request.Method === 'unsubscribe')) {
                         const response = {
                             ID: request.ID,
                             Method: request.Method,
