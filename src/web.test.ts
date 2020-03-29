@@ -4,7 +4,6 @@ import * as SocketIO from 'socket.io-client';
 import { Web } from './index';
 import { v4 as uuidv4 } from 'uuid';
 import { Arca } from './arca';
-import { Response } from './types';
 
 function generateRequestAndResponse() {
     const id = uuidv4();
@@ -187,6 +186,92 @@ test('Send a request, await for its response and a notification', async () => {
             }
         });
 
+        client.emit('jsonrpc', request);
+    }); } catch(err) {
+        teardown();
+        fail(err);
+    }
+    teardown();
+});
+
+test('Check request to subscribe to Source', async () => {
+    const arca = new Arca();
+    arca.config.arca.port = '22346';
+
+    const web = new Web({ arca });
+    const client = SocketIO(`http://localhost:${web.config.port}/`);
+
+    function teardown() {
+        client.disconnect();
+        web.close();
+    }
+
+    try { await new Promise(async (resolve) => {
+       const request = {
+            ID: 'id-of-error',
+            Method: 'subscribe',
+            Params: {
+                Source: 'test'
+            }
+        };
+
+        const expectedResponse = {
+            ID: 'id-of-error',
+            Method: 'subscribe',
+            Context: { Source: 'test' },
+            Result: true
+        };
+
+        client.on('jsonrpc', (res: any) => {
+            expect(res).toStrictEqual(expectedResponse);
+            resolve();
+        });
+
+        await web.listen();
+        client.connect();
+        client.emit('jsonrpc', request);
+    }); } catch(err) {
+        teardown();
+        fail(err);
+    }
+    teardown();
+});
+
+test('Check request to subscribe to Target', async () => {
+    const arca = new Arca();
+    arca.config.arca.port = '22346';
+
+    const web = new Web({ arca });
+    const client = SocketIO(`http://localhost:${web.config.port}/`);
+
+    function teardown() {
+        client.disconnect();
+        web.close();
+    }
+
+    try { await new Promise(async (resolve) => {
+       const request = {
+            ID: 'id-of-error',
+            Method: 'subscribe',
+            Params: {
+                Target: 'test'
+            }
+        };
+
+        const expectedResponse = {
+            ID: 'id-of-error',
+            Method: 'subscribe',
+            Context: { Target: 'test' },
+            Result: true
+        };
+
+        client.on('jsonrpc', (res: any) => {
+            expect(res).toStrictEqual(expectedResponse);
+            resolve();
+        });
+
+        await web.listen();
+        client.connect();
         client.emit('jsonrpc', request);
     }); } catch(err) {
         teardown();

@@ -46,6 +46,16 @@ export class Web {
             clients[socket.id] = socket;
             socket.on('jsonrpc', async (request: Request) => {
                 if (request instanceof Object) {
+                    if (request.Method === 'subscribe') {
+                        const response = {
+                            ID: request.ID,
+                            Method: request.Method,
+                            Context: {...request.Params},
+                            Result: true,
+                        };
+                        socket.emit('jsonrpc', response);
+                        return
+                    }
                     const response = await arca.request(request);
                     socket.emit('jsonrpc', response);
                 } else {
