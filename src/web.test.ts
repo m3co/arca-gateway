@@ -122,6 +122,7 @@ test('Send an incorrect request and fail', async () => {
     teardown();
 });
 
+// This test may change as it awaits for a notification without subscribing
 test('Send a request, await for its response and a notification', async () => {
     const arca = new Arca();
     arca.config.arca.port = '22346';

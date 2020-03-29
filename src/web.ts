@@ -16,6 +16,9 @@ export class Web {
 
     private io: SocketIO.Server;
     private arca: Arca;
+    private clients: {
+        [key: string]: SocketIO.Socket
+    } = {};
     constructor(params: {
         arca: Arca;
         configLocation?: string,
@@ -31,12 +34,16 @@ export class Web {
     };
 
     listen(retryToConnectTimeout: number = 1000) {
-        const { arca, io, config } = this;
+        const { arca, io, config, clients } = this;
+
+        this.arca.onNotification = (response: Response) => {
+            Object.values(clients).forEach(socket => {
+                socket.emit('jsonrpc', response);
+            });
+        };
 
         io.on('connect', (socket: SocketIO.Socket) => {
-            arca.onNotification = (response: Response) => {
-                socket.emit('jsonrpc', response);
-            };
+            clients[socket.id] = socket;
             socket.on('jsonrpc', async (request: Request) => {
                 if (request instanceof Object) {
                     const response = await arca.request(request);
@@ -51,7 +58,11 @@ export class Web {
                     };
                     socket.emit('jsonrpc', responseError);
                 }
-            })
+            });
+
+            socket.on('disconnect', () => {
+                delete clients[socket.id];
+            });
         });
 
         io.listen(config.port);
