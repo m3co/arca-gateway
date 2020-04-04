@@ -17,7 +17,11 @@ export class Web {
     private io: SocketIO.Server;
     private arca: Arca;
     private clients: {
-        [key: string]: SocketIO.Socket
+        [key: string]: {
+            socket: SocketIO.Socket,
+            Sources: string[],
+            Targets: string[]
+        }
     } = {};
     constructor(params: {
         arca: Arca;
@@ -36,14 +40,46 @@ export class Web {
     listen(retryToConnectTimeout: number = 1000) {
         const { arca, io, config, clients } = this;
 
+        const doit = {
+            'subscribe': function(id: string, params: {Source?: string, Target?: string}) {
+                if (params.Source) {
+                    clients[id].Sources.push(params.Source);
+                }
+                if (params.Target) {
+                    clients[id].Sources.push(params.Target);
+                }
+            },
+            'unsubscribe': function(id: string, params: {Source?: string, Target?: string}) {
+                //console.log(id, 'hmmm unsubscribe', params);
+            }
+        }
+
         this.arca.onNotification = (response: Response) => {
-            Object.values(clients).forEach(socket => {
-                socket.emit('jsonrpc', response);
+            Object.values(clients).forEach(client => {
+                if (response.Context) {
+                    if (response.Context.Source) {
+                        const found = client.Sources.find((source) => source === response.Context.Source);
+                        if (found) {
+                            client.socket.emit('jsonrpc', response);
+                        }
+                    }
+                    if (response.Context.Target) {
+                        const found = client.Targets.find((target) => target === response.Context.Target);
+                        if (found) {
+                            client.socket.emit('jsonrpc', response);
+                        }
+                    }
+
+                }
             });
         };
 
         io.on('connect', (socket: SocketIO.Socket) => {
-            clients[socket.id] = socket;
+            clients[socket.id] = {
+                socket,
+                Sources: [],
+                Targets: [],
+            };
             socket.on('jsonrpc', async (request: Request) => {
                 if (request instanceof Object) {
                     if ((request.Method === 'subscribe') ||
@@ -54,6 +90,7 @@ export class Web {
                             Context: {...request.Params},
                             Result: true,
                         };
+                        request.Params && doit[request.Method](socket.id, request.Params);
                         socket.emit('jsonrpc', response);
                         return
                     }

@@ -121,8 +121,7 @@ test('Send an incorrect request and fail', async () => {
     teardown();
 });
 
-// This test may change as it awaits for a notification without subscribing
-test('Send a request, await for its response and a notification', async () => {
+test('Send a request, await for its response and skip the notification', async () => {
     const arca = new Arca();
     arca.config.arca.port = '22346';
 
@@ -134,9 +133,13 @@ test('Send a request, await for its response and a notification', async () => {
         web.close();
     }
 
-    try { await new Promise(async (resolve) => {
+    try { await new Promise(async (resolve, reject) => {
         await web.listen();
         client.connect();
+
+        setTimeout(() => {
+            resolve();
+        }, 200);
 
         const id = 'id-of-error';
         const request = {
@@ -153,37 +156,16 @@ test('Send a request, await for its response and a notification', async () => {
             Result: { Message: 'this is the message' },
             Error: null
         };
-        let expectedResponsePassed = false;
 
-        const expectedNotification = {
-            Context: {
-                Source: 'test',
-            },
-            Error: null,
-            ID: '',
-            Method: 'notification-sent',
-            Result: {
-                Message: 'this is the message 1',
-            },
-        };
-        let expectedNotificationPassed = false;
         let i = 0;
 
         client.on('jsonrpc', (res: any) => {
-            i++;
-            if (!expectedNotificationPassed) {
-                expect(res).toStrictEqual(expectedNotification);
-                expectedNotificationPassed = true;
-                return;
-            }
-            if (!expectedResponsePassed) {
+            if (i === 0) {
                 expect(res).toStrictEqual(expectedResponse);
-                expectedResponsePassed = true;
+            } else {
+                reject(new Error('Received an unexpected response'));
             }
-
-            if ((i === 2) && expectedResponsePassed && expectedNotificationPassed) {
-                resolve();
-            }
+            i++;
         });
 
         client.emit('jsonrpc', request);
