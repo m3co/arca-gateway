@@ -475,3 +475,209 @@ test('Three clients connect, one subscribes to Target and only one receives a no
     }
     teardown();
 });
+
+test('Three clients connect, two subscribes to Source, both receives, one unsubscribe and only one receives a notification', async () => {
+    const arca = new Arca();
+    arca.config.arca.port = '22346';
+
+    const web = new Web({ arca });
+    const clients = [
+        SocketIO(`http://localhost:${web.config.port}/`),
+        SocketIO(`http://localhost:${web.config.port}/`),
+        SocketIO(`http://localhost:${web.config.port}/`)];
+
+    function teardown() {
+        clients.forEach(client => client.disconnect());
+        web.close();
+    }
+
+    try { await new Promise(async (resolve, reject) => {
+
+        const iSelected = [0, 1];
+        const timer = setTimeout(() => {
+            resolve();
+        }, 1000);
+
+        const expectedNotification = {
+            ID: '',
+            Method: 'notification-sent',
+            Context: { Source: 'test' },
+            Result: { Message: 'this is the message 1' },
+            Error: null
+        };
+        let clientUnsubscribed = false;
+
+        clients.forEach((client, i) => client.on('jsonrpc', (res: any) => {
+            if (i in iSelected) {
+                if (res.ID === '') {
+                    if (i === 1 && clientUnsubscribed) {
+                        reject(new Error('Notification ocurred after being unsubscripted'));
+                        return;
+                    }
+                    expect(res).toStrictEqual(expectedNotification);
+                    return;
+                }
+                if (i === 1 && res.ID && res.Method === 'unsubscribe') {
+                    expect(res).toStrictEqual({
+                        ID: 'id-of-error2',
+                        Method: 'unsubscribe',
+                        Context: { Source: 'test' },
+                        Result: true
+                    });
+                    clientUnsubscribed = true;
+                    return;
+                }
+            } else {
+                clearTimeout(timer);
+                reject(new Error('Notification ocurred without being subscripted'));
+            }
+        }));
+
+        await web.listen();
+        clients.forEach(client => client.connect());
+
+        // two subscribe to Source = test
+        iSelected.forEach(i => {
+            const request = {
+                ID: 'id-of-error3',
+                Method: 'subscribe',
+                Params: {
+                    Source: 'test'
+                }
+            };
+            clients[i].emit('jsonrpc', request);
+        });
+
+        // one request, two receive the notification
+        const request = {
+            ID: 'id-of-error-something-else',
+            Method: `1-request-1-response-1-notification`,
+            Context: {
+                Source: 'test'
+            }
+        };
+        clients[0].emit('jsonrpc', request);
+
+        // a client unsubscribes
+        setTimeout(() => {
+            const request2 = {
+                ID: 'id-of-error2',
+                Method: 'unsubscribe',
+                Params: {
+                    Source: 'test'
+                }
+            };
+            clients[1].emit('jsonrpc', request2);
+            request.ID = 'something-different';
+            clients[0].emit('jsonrpc', request);
+        }, 200);
+
+    }); } catch(err) {
+        teardown();
+        fail(err);
+    }
+    teardown();
+});
+
+test('Three clients connect, two subscribes to Target, both receives, one unsubscribe and only one receives a notification', async () => {
+    const arca = new Arca();
+    arca.config.arca.port = '22346';
+
+    const web = new Web({ arca });
+    const clients = [
+        SocketIO(`http://localhost:${web.config.port}/`),
+        SocketIO(`http://localhost:${web.config.port}/`),
+        SocketIO(`http://localhost:${web.config.port}/`)];
+
+    function teardown() {
+        clients.forEach(client => client.disconnect());
+        web.close();
+    }
+
+    try { await new Promise(async (resolve, reject) => {
+
+        const iSelected = [0, 1];
+        const timer = setTimeout(() => {
+            resolve();
+        }, 1000);
+
+        const expectedNotification = {
+            ID: '',
+            Method: 'notification-sent',
+            Context: { Target: 'test' },
+            Result: { Message: 'this is the message 1' },
+            Error: null
+        };
+        let clientUnsubscribed = false;
+
+        clients.forEach((client, i) => client.on('jsonrpc', (res: any) => {
+            if (i in iSelected) {
+                if (res.ID === '') {
+                    if (i === 1 && clientUnsubscribed) {
+                        reject(new Error('Notification ocurred after being unsubscripted'));
+                        return;
+                    }
+                    expect(res).toStrictEqual(expectedNotification);
+                    return;
+                }
+                if (i === 1 && res.ID && res.Method === 'unsubscribe') {
+                    expect(res).toStrictEqual({
+                        ID: 'id-of-error2',
+                        Method: 'unsubscribe',
+                        Context: { Target: 'test' },
+                        Result: true
+                    });
+                    clientUnsubscribed = true;
+                    return;
+                }
+            } else {
+                clearTimeout(timer);
+                reject(new Error('Notification ocurred without being subscripted'));
+            }
+        }));
+
+        await web.listen();
+        clients.forEach(client => client.connect());
+
+        // two subscribe to Target = test
+        iSelected.forEach(i => {
+            const request = {
+                ID: 'id-of-error3',
+                Method: 'subscribe',
+                Params: {
+                    Target: 'test'
+                }
+            };
+            clients[i].emit('jsonrpc', request);
+        });
+
+        // one request, two receive the notification
+        const request = {
+            ID: 'id-of-error-something-else',
+            Method: `1-request-1-response-1-notification`,
+            Context: {
+                Target: 'test'
+            }
+        };
+        clients[0].emit('jsonrpc', request);
+
+        // a client unsubscribes
+        setTimeout(() => {
+            const request2 = {
+                ID: 'id-of-error2',
+                Method: 'unsubscribe',
+                Params: {
+                    Target: 'test'
+                }
+            };
+            clients[1].emit('jsonrpc', request2);
+            request.ID = 'something-different';
+            clients[0].emit('jsonrpc', request);
+        }, 200);
+
+    }); } catch(err) {
+        teardown();
+        fail(err);
+    }
+    teardown();
+});

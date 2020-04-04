@@ -21,16 +21,6 @@ type Request struct {
 // Handles incoming requests.
 func handleRequest(conn net.Conn) {
 	// Make a buffer to hold incoming data.
-	response := jsonrpc.Response{}
-	response.ID = "id-of-error"
-	response.Method = "error-in-the-middle"
-	response.Context = map[string]string{
-		"Source": "test",
-	}
-	response.Result = map[string]string{
-		"Message": "this is the message",
-	}
-	responseMsg, _ := json.Marshal(response)
 
 	buf := make([]byte, 1024)
 	_, err := conn.Read(buf)
@@ -49,6 +39,17 @@ func handleRequest(conn net.Conn) {
 		return
 	}
 	fmt.Println(request, "received from client")
+
+	response := jsonrpc.Response{}
+	response.ID = request.ID
+	response.Method = "error-in-the-middle"
+	response.Context = map[string]string{
+		"Source": "test",
+	}
+	response.Result = map[string]string{
+		"Message": "this is the message",
+	}
+	responseMsg, _ := json.Marshal(response)
 
 	if request.Method == "msg-in-2-parts" {
 		first := responseMsg[:100]
@@ -207,10 +208,11 @@ func handleRequest(conn net.Conn) {
 		}
 		response.Method = "notification-sent"
 		responseMsg2, _ := json.Marshal(response)
-		twoMessages := []byte(fmt.Sprintf("%s\n%s", string(responseMsg2), string(responseMsg)))
+		twoMessages := []byte(fmt.Sprintf("%s\n%s\n", string(responseMsg2), string(responseMsg)))
 
 		fmt.Println(string(twoMessages))
 		conn.Write(twoMessages)
+		handleRequest(conn)
 	}
 
 	if request.Method == "1-request-1-response-1-notification-target" {
@@ -232,10 +234,11 @@ func handleRequest(conn net.Conn) {
 		}
 		response.Method = "notification-sent"
 		responseMsg3, _ := json.Marshal(response)
-		twoMessages := []byte(fmt.Sprintf("%s\n%s", string(responseMsg3), string(responseMsg2)))
+		twoMessages := []byte(fmt.Sprintf("%s\n%s\n", string(responseMsg3), string(responseMsg2)))
 
 		fmt.Println(string(twoMessages))
 		conn.Write(twoMessages)
+		handleRequest(conn)
 	}
 
 	conn.Write(([]byte("\n")))

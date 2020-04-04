@@ -50,7 +50,14 @@ export class Web {
                 }
             },
             'unsubscribe': function(id: string, params: {Source?: string, Target?: string}) {
-                //console.log(id, 'hmmm unsubscribe', params);
+                if (params.Source) {
+                    clients[id].Sources = clients[id].Sources.filter(source =>
+                        source !== params.Source);
+                }
+                if (params.Target) {
+                    clients[id].Targets = clients[id].Targets.filter(target =>
+                        target !== params.Target);
+                }
             }
         }
 
