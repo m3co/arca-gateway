@@ -365,3 +365,67 @@ test('Check request to unsubscribe to Target', async () => {
     }
     teardown();
 });
+
+test('Three clients connect, one subscribes to Source and only one receives a notification', async () => {
+    const arca = new Arca();
+    arca.config.arca.port = '22346';
+
+    const web = new Web({ arca });
+    const clients = [
+        SocketIO(`http://localhost:${web.config.port}/`),
+        SocketIO(`http://localhost:${web.config.port}/`),
+        SocketIO(`http://localhost:${web.config.port}/`)];
+
+    function teardown() {
+        clients.forEach(client => client.disconnect());
+        web.close();
+    }
+
+    try { await new Promise(async (resolve, reject) => {
+
+        const iSelected = 0;
+        const timer = setTimeout(() => {
+            resolve();
+        }, 1000);
+
+        const expectedNotification = {
+            ID: '',
+            Method: 'notification-sent',
+            Context: { Source: 'test' },
+            Result: { Message: 'this is the message 1' },
+            Error: null
+        };
+        clients.forEach((client, i) => client.on('jsonrpc', (res: any) => {
+            if (i === iSelected) {
+                if (res.ID === '') {
+                    expect(res).toStrictEqual(expectedNotification);
+                }
+            } else {
+                clearTimeout(timer);
+                reject(new Error('Notification ocurred without being subscripted'));
+            }
+        }));
+
+        await web.listen();
+        clients.forEach(client => client.connect());
+        clients[iSelected].emit('jsonrpc', {
+            ID: 'id-of-error',
+            Method: 'subscribe',
+            Params: {
+                Source: 'test'
+            }
+        });
+        clients[iSelected].emit('jsonrpc', {
+            ID: 'id-of-error',
+            Method: `1-request-1-response-1-notification`,
+            Context: {
+                Source: 'test'
+            }
+        });
+
+    }); } catch(err) {
+        teardown();
+        fail(err);
+    }
+    teardown();
+});
