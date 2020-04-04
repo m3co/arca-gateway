@@ -4,6 +4,7 @@
   "description": "Example of the socket IO proxy",
   "main": "index.js",
   "scripts": {
+    "build": "tsc",
     "server": "node index.js",
     "start-go-server": "./run-go.sh",
     "start": "tsc && node build/index.js",

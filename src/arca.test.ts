@@ -1,5 +1,5 @@
 
-import { Arca } from './index';
+import { Arca } from './arca';
 import { Request, Response } from './types';
 import { v4 as uuidv4 } from 'uuid';
 

@@ -1,7 +1,7 @@
 
 import * as SocketIO from 'socket.io-client';
 
-import { Web } from './index';
+import { Web } from './web';
 import { v4 as uuidv4 } from 'uuid';
 import { Arca } from './arca';
 

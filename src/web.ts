@@ -6,7 +6,6 @@ import * as SocketIO from 'socket.io';
 import { Arca } from './arca';
 import { Request, Response } from './types';
 
-
 export class Web {
     public config: {
         [key: string]: {
