@@ -213,6 +213,31 @@ func handleRequest(conn net.Conn) {
 		conn.Write(twoMessages)
 	}
 
+	if request.Method == "1-request-1-response-1-notification-target" {
+		response.Result = map[string]string{
+			"Message": "this is the message 1",
+		}
+		response.Context = map[string]string{
+			"Target": "test",
+		}
+		response.Method = "notification-sent"
+		responseMsg2, _ := json.Marshal(response)
+
+		response.ID = ""
+		response.Result = map[string]string{
+			"Message": "this is the message 1",
+		}
+		response.Context = map[string]string{
+			"Target": "test",
+		}
+		response.Method = "notification-sent"
+		responseMsg3, _ := json.Marshal(response)
+		twoMessages := []byte(fmt.Sprintf("%s\n%s", string(responseMsg3), string(responseMsg2)))
+
+		fmt.Println(string(twoMessages))
+		conn.Write(twoMessages)
+	}
+
 	conn.Write(([]byte("\n")))
 	// Close the connection when you're done with it.
 	conn.Close()
