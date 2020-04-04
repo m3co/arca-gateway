@@ -46,7 +46,7 @@ export class Web {
                     clients[id].Sources.push(params.Source);
                 }
                 if (params.Target) {
-                    clients[id].Sources.push(params.Target);
+                    clients[id].Targets.push(params.Target);
                 }
             },
             'unsubscribe': function(id: string, params: {Source?: string, Target?: string}) {
