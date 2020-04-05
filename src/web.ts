@@ -2,6 +2,7 @@
 import { readFileSync } from 'fs';
 import { parse } from 'ini';
 import * as SocketIO from 'socket.io';
+import { Server } from 'http';
 
 import { Arca } from './arca';
 import { Request, Response } from './types';
@@ -13,6 +14,7 @@ export class Web {
         };
     } = {};
 
+    private proxy?: Server;
     private io: SocketIO.Server;
     private arca: Arca;
     private clients: {
@@ -24,20 +26,32 @@ export class Web {
     } = {};
     constructor(params: {
         arca: Arca;
-        configLocation?: string,
+        proxy?: Server;
+        configLocation?: string;
     }) {
         const defaultParams = {
-            configLocation: 'config.ini',
+            configLocation: 'config.ini'
         };
         const { configLocation } = {...defaultParams, ...params};
 
-        this.io = SocketIO();
+        if (params.proxy) {
+            this.io = SocketIO(params.proxy);
+        } else {
+            this.io = SocketIO();
+        }
         this.config = parse(readFileSync(configLocation, 'utf-8'));
         this.arca = params.arca;
+        this.proxy = params.proxy;
     };
 
     listen(retryToConnectTimeout: number = 1000) {
-        const { arca, io, config, clients } = this;
+        const { arca, io, proxy, config, clients } = this;
+
+        if (proxy) {
+            proxy.listen(config.port)
+        } else {
+            io.listen(config.port);
+        }
 
         const doit = {
             'subscribe': function(id: string, params: {Source?: string, Target?: string}) {
@@ -119,13 +133,16 @@ export class Web {
             });
         });
 
-        io.listen(config.port);
         return arca.connect(retryToConnectTimeout);
     };
 
     close() {
-        const { arca, io } = this;
-        io.close();
+        const { arca, io, proxy } = this;
+        if (proxy) {
+            proxy.close()
+        } else {
+            io.close();
+        }
         arca.disconnect();
     };
 
