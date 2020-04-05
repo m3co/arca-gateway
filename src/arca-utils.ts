@@ -168,7 +168,6 @@ export function defineAPI(
         ) => {
             arca.once('error', reject);
             arca.write(`${JSON.stringify(request)}\n`);
-
             try {
                 const response = await bus.getResponseByID(request.ID, waitForResponseTimeout);
                 log.info({
@@ -176,7 +175,6 @@ export function defineAPI(
                     response,
                 });
                 resolve(response);
-                arca.off('error', reject);
             } catch(err) {
                 const error = err as Error;
                 log.error({
@@ -185,6 +183,7 @@ export function defineAPI(
                 });
                 reject(err);
             }
+            arca.off('error', reject);
         });
     };
 
