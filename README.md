@@ -2,7 +2,7 @@
 
 Lo que me interesa de este proxy es que nodeJS tiene una biblioteca excelentisima llamada [Socket.io](https://github.com/socketio/socket.io) y, bueno...
 
-# Como usar?
+## Como usar?
 
 ```sh
 npm install;
@@ -27,3 +27,8 @@ port = 22345
 host = localhost
 ```
 
+## Las pruebas
+
+- `npm run start-go-server` es para correr el contenedor con el servidor de prueba
+- `npm start` es donde pienso poner a correr el entorno de desarrollo
+- `npm test` ya funciona y muestra al menos una primera prueba sencilla

@@ -1,5 +1,7 @@
 /node_modules
 .*.sw*
-package-lock.json
 config.ini
 arca-gateway.log
+/build
+/coverage
+/.vscode
