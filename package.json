@@ -7,7 +7,8 @@
     "build": "tsc",
     "start-go-server": "./run-go.sh",
     "start": "tsc && node build/index.js",
-    "show": "tail -f arca-gateway.log | bunyan",
+    "show-server": "tail -f arca-server.log | bunyan -l error",
+    "show-web": "tail -f arca-web.log | bunyan -l error",
     "test": "./run-go.sh; echo 'waiting the go-server to run...'; sleep 5; jest --watchAll --detectOpenHandles; echo stopping the go-server; docker stop arca-gateway-go-test"
   },
   "author": "Andres Rios <rianby64@gmail.com>",
