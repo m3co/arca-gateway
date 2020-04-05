@@ -191,7 +191,7 @@ test('Check request to subscribe to Source', async () => {
     try { await new Promise(async (resolve) => {
        const request = {
             ID: 'id-of-error',
-            Method: 'subscribe',
+            Method: 'Subscribe',
             Params: {
                 Source: 'test'
             }
@@ -199,7 +199,7 @@ test('Check request to subscribe to Source', async () => {
 
         const expectedResponse = {
             ID: 'id-of-error',
-            Method: 'subscribe',
+            Method: 'Subscribe',
             Context: { Source: 'test' },
             Result: true
         };
@@ -234,7 +234,7 @@ test('Check request to subscribe to Target', async () => {
     try { await new Promise(async (resolve) => {
        const request = {
             ID: 'id-of-error',
-            Method: 'subscribe',
+            Method: 'Subscribe',
             Params: {
                 Target: 'test'
             }
@@ -242,7 +242,7 @@ test('Check request to subscribe to Target', async () => {
 
         const expectedResponse = {
             ID: 'id-of-error',
-            Method: 'subscribe',
+            Method: 'Subscribe',
             Context: { Target: 'test' },
             Result: true
         };
@@ -277,7 +277,7 @@ test('Check request to unsubscribe to Source', async () => {
     try { await new Promise(async (resolve) => {
        const request = {
             ID: 'id-of-error',
-            Method: 'unsubscribe',
+            Method: 'Unsubscribe',
             Params: {
                 Source: 'test'
             }
@@ -285,7 +285,7 @@ test('Check request to unsubscribe to Source', async () => {
 
         const expectedResponse = {
             ID: 'id-of-error',
-            Method: 'unsubscribe',
+            Method: 'Unsubscribe',
             Context: { Source: 'test' },
             Result: true
         };
@@ -320,7 +320,7 @@ test('Check request to unsubscribe to Target', async () => {
     try { await new Promise(async (resolve) => {
        const request = {
             ID: 'id-of-error',
-            Method: 'unsubscribe',
+            Method: 'Unsubscribe',
             Params: {
                 Target: 'test'
             }
@@ -328,7 +328,7 @@ test('Check request to unsubscribe to Target', async () => {
 
         const expectedResponse = {
             ID: 'id-of-error',
-            Method: 'unsubscribe',
+            Method: 'Unsubscribe',
             Context: { Target: 'test' },
             Result: true
         };
@@ -392,7 +392,7 @@ test('Three clients connect, one subscribes to Source and only one receives a no
         clients.forEach(client => client.connect());
         clients[iSelected].emit('jsonrpc', {
             ID: 'id-of-error',
-            Method: 'subscribe',
+            Method: 'Subscribe',
             Params: {
                 Source: 'test'
             }
@@ -456,7 +456,7 @@ test('Three clients connect, one subscribes to Target and only one receives a no
         clients.forEach(client => client.connect());
         clients[iSelected].emit('jsonrpc', {
             ID: 'id-of-error',
-            Method: 'subscribe',
+            Method: 'Subscribe',
             Params: {
                 Target: 'test'
             }
@@ -520,7 +520,7 @@ test('Three clients connect, two subscribes to Source, both receives, one unsubs
                 if (i === 1 && res.ID && res.Method === 'unsubscribe') {
                     expect(res).toStrictEqual({
                         ID: 'id-of-error2',
-                        Method: 'unsubscribe',
+                        Method: 'Unsubscribe',
                         Context: { Source: 'test' },
                         Result: true
                     });
@@ -540,7 +540,7 @@ test('Three clients connect, two subscribes to Source, both receives, one unsubs
         iSelected.forEach(i => {
             const request = {
                 ID: 'id-of-error3',
-                Method: 'subscribe',
+                Method: 'Subscribe',
                 Params: {
                     Source: 'test'
                 }
@@ -562,7 +562,7 @@ test('Three clients connect, two subscribes to Source, both receives, one unsubs
         setTimeout(() => {
             const request2 = {
                 ID: 'id-of-error2',
-                Method: 'unsubscribe',
+                Method: 'Unsubscribe',
                 Params: {
                     Source: 'test'
                 }
@@ -623,7 +623,7 @@ test('Three clients connect, two subscribes to Target, both receives, one unsubs
                 if (i === 1 && res.ID && res.Method === 'unsubscribe') {
                     expect(res).toStrictEqual({
                         ID: 'id-of-error2',
-                        Method: 'unsubscribe',
+                        Method: 'Unsubscribe',
                         Context: { Target: 'test' },
                         Result: true
                     });
@@ -643,7 +643,7 @@ test('Three clients connect, two subscribes to Target, both receives, one unsubs
         iSelected.forEach(i => {
             const request = {
                 ID: 'id-of-error3',
-                Method: 'subscribe',
+                Method: 'Subscribe',
                 Params: {
                     Target: 'test'
                 }
@@ -665,7 +665,7 @@ test('Three clients connect, two subscribes to Target, both receives, one unsubs
         setTimeout(() => {
             const request2 = {
                 ID: 'id-of-error2',
-                Method: 'unsubscribe',
+                Method: 'Unsubscribe',
                 Params: {
                     Target: 'test'
                 }
