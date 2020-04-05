@@ -1,9 +1,17 @@
 
 import { Socket } from 'net';
+import { createLogger } from 'bunyan';
 import { ECONNRESET, ECONNREFUSED,
     errorUnexpectedEndJSONInput,
     Request, Response } from './types';
 import { Arca } from './arca';
+
+const log = createLogger({
+    name: 'arca-server',
+    streams: [{
+        path: './arca-server.log',
+    }]
+});
 
 const processRows = (msg: string): Response[] => {
     const rows = msg.split('\n').filter((str) => str.length > 0);
@@ -17,6 +25,10 @@ const processData = (bus: {
     processResponses: (responses: Response[]) => void,
     bufferMsg: string
 }) => (data: Buffer) => {
+    log.info({
+        location: 'Arca.processData',
+        data: data.toString(),
+    })
     bus.bufferMsg += data.toString();
     try {
         const responses = processRows(bus.bufferMsg);
@@ -51,7 +63,12 @@ export const prepareHandler = (obj: Arca): {
             reject: (reason: Error) => void,
         ) => {
             const timeout = setTimeout(() => {
-                reject(new Error(`Timeout at getResponseByID('${ID}')`));
+                const error = new Error(`Timeout at getResponseByID('${ID}')`);
+                log.error({
+                    location: 'Arca.getResponseByID.timeout',
+                    error
+                });
+                reject(error);
             }, waitForResponseTimeout);
             const callback = () => {
                 responseQueue = responseQueue.filter((response: Response): boolean => {
@@ -60,6 +77,10 @@ export const prepareHandler = (obj: Arca): {
                         clear(callback, timeout);
                         return false;
                     }
+                    log.info({
+                        location: 'Arca.getResponseByID.callback',
+                        response
+                    });
                     return true;
                 });
             };
@@ -102,6 +123,10 @@ export function defineAPI(
             reject: (reason: NodeJS.ErrnoException) => void
         ) => {
             const processError = (err: NodeJS.ErrnoException) => {
+                log.error({
+                    location: 'Arca.connect',
+                    error: err,
+                });
                 if (err.code === ECONNREFUSED || err.code === ECONNRESET) {
                     retryToConnectTimeoutID = setTimeout(() => {
                         arca.once('error', processError);
@@ -128,6 +153,10 @@ export function defineAPI(
     };
 
     const request = (request: Request, waitForResponseTimeout: number = 1000): Promise<Response> => {
+        log.info({
+            location: 'Arca.request',
+            request,
+        });
         return new Promise<Response>(async (
             resolve: (value: Response | PromiseLike<Response>) => void,
             reject: (reason: NodeJS.ErrnoException) => void,
@@ -137,8 +166,17 @@ export function defineAPI(
 
             try {
                 const response = await bus.getResponseByID(request.ID, waitForResponseTimeout);
+                log.info({
+                    location: 'Arca.request.response',
+                    response,
+                });
                 resolve(response);
             } catch(err) {
+                const error = err as Error;
+                log.error({
+                    location: 'Arca.request.try',
+                    error
+                });
                 reject(err);
             }
         });

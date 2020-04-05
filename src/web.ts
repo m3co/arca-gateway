@@ -3,9 +3,17 @@ import { readFileSync } from 'fs';
 import { parse } from 'ini';
 import * as SocketIO from 'socket.io';
 import { Server } from 'http';
+import { createLogger } from 'bunyan';
 
 import { Arca } from './arca';
 import { Request, Response } from './types';
+
+const log = createLogger({
+    name: 'arca-web',
+    streams: [{
+        path: './arca-web.log',
+    }]
+});
 
 export class Web {
     public config: {
@@ -75,6 +83,10 @@ export class Web {
         }
 
         this.arca.onNotification = (response: Response) => {
+            log.info({
+                location: 'Web.arca.onNotification',
+                response,
+            });
             Object.values(clients).forEach(client => {
                 if (response.Context) {
                     if (response.Context.Source) {
@@ -101,6 +113,10 @@ export class Web {
                 Targets: [],
             };
             socket.on('jsonrpc', async (request: Request) => {
+                log.info({
+                    location: 'Web.on:jsonrpc',
+                    request,
+                });
                 if (request instanceof Object) {
                     if ((request.Method === 'subscribe') ||
                         (request.Method === 'unsubscribe')) {
@@ -114,8 +130,16 @@ export class Web {
                         socket.emit('jsonrpc', response);
                         return
                     }
-                    const response = await arca.request(request);
-                    socket.emit('jsonrpc', response);
+                    try {
+                        const response = await arca.request(request);
+                        socket.emit('jsonrpc', response);
+                    } catch(err) {
+                        const error = err as Error;
+                        log.error({
+                            location: 'Web.on:jsonrpc.request',
+                            error,
+                        })
+                    }
                 } else {
                     const responseError = {
                         Method: 'socket.on::jsonrpc',
@@ -124,6 +148,10 @@ export class Web {
                             Message: 'Parse error',
                         }
                     };
+                    log.error({
+                        location: 'Web.on:jsonrpc.checkRequest',
+                        responseError,
+                    });
                     socket.emit('jsonrpc', responseError);
                 }
             });
