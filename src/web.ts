@@ -62,7 +62,7 @@ export class Web {
         }
 
         const doit = {
-            'subscribe': function(id: string, params: {Source?: string, Target?: string}) {
+            'Subscribe': function(id: string, params: {Source?: string, Target?: string}) {
                 if (params.Source) {
                     clients[id].Sources.push(params.Source);
                 }
@@ -70,7 +70,7 @@ export class Web {
                     clients[id].Targets.push(params.Target);
                 }
             },
-            'unsubscribe': function(id: string, params: {Source?: string, Target?: string}) {
+            'Unsubscribe': function(id: string, params: {Source?: string, Target?: string}) {
                 if (params.Source) {
                     clients[id].Sources = clients[id].Sources.filter(source =>
                         source !== params.Source);
@@ -118,8 +118,8 @@ export class Web {
                     request,
                 });
                 if (request instanceof Object) {
-                    if ((request.Method === 'subscribe') ||
-                        (request.Method === 'unsubscribe')) {
+                    if ((request.Method === 'Subscribe') ||
+                        (request.Method === 'Unsubscribe')) {
                         const response = {
                             ID: request.ID,
                             Method: request.Method,
