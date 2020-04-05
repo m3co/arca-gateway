@@ -139,7 +139,12 @@ export function defineAPI(
 
             arca.once('error', processError);
             arca.once('error', reject);
-            arca.once('connect', resolve);
+            function connected() {
+                resolve();
+                arca.off('connect', connected);
+                arca.off('error', reject);
+            }
+            arca.once('connect', connected);
             arca.connect(Number(config.arca.port), config.arca.host);
         });
     };
@@ -171,6 +176,7 @@ export function defineAPI(
                     response,
                 });
                 resolve(response);
+                arca.off('error', reject);
             } catch(err) {
                 const error = err as Error;
                 log.error({
