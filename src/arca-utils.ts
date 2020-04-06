@@ -25,10 +25,6 @@ const processData = (bus: {
     processResponses: (responses: Response[]) => void,
     bufferMsg: string
 }) => (data: Buffer) => {
-    log.info({
-        location: 'Arca.processData',
-        data: data.toString(),
-    })
     bus.bufferMsg += data.toString();
     try {
         const responses = processRows(bus.bufferMsg);
@@ -57,7 +53,7 @@ export const prepareHandler = (obj: Arca): {
         callbacks = callbacks.filter(callback => callback !== currentCallback);
     }
 
-    const getResponseByID = (ID: string, waitForResponseTimeout: number = 1000): Promise<Response> => {
+    const getResponseByID = (ID: string, waitForResponseTimeout: number = 4000): Promise<Response> => {
         return new Promise<Response>((
             resolve: (value: Response | PromiseLike<Response>) => void,
             reject: (reason: Error) => void,
@@ -65,6 +61,7 @@ export const prepareHandler = (obj: Arca): {
             const timeout = setTimeout(() => {
                 const error = new Error(`Timeout at getResponseByID('${ID}')`);
                 log.error({
+                    ID,
                     location: 'Arca.getResponseByID.timeout',
                     error
                 });
@@ -77,10 +74,6 @@ export const prepareHandler = (obj: Arca): {
                         clear(callback, timeout);
                         return false;
                     }
-                    log.info({
-                        location: 'Arca.getResponseByID.callback',
-                        response
-                    });
                     return true;
                 });
             };
@@ -158,10 +151,6 @@ export function defineAPI(
     };
 
     const request = (request: Request, waitForResponseTimeout: number = 1000): Promise<Response> => {
-        log.info({
-            location: 'Arca.request',
-            request,
-        });
         return new Promise<Response>(async (
             resolve: (value: Response | PromiseLike<Response>) => void,
             reject: (reason: NodeJS.ErrnoException) => void,
@@ -169,14 +158,11 @@ export function defineAPI(
             arca.write(`${JSON.stringify(request)}\n`);
             try {
                 const response = await bus.getResponseByID(request.ID, waitForResponseTimeout);
-                log.info({
-                    location: 'Arca.request.response',
-                    response,
-                });
                 resolve(response);
             } catch(err) {
                 const error = err as Error;
                 log.error({
+                    request,
                     location: 'Arca.request.try',
                     error
                 });

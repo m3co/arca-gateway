@@ -83,10 +83,6 @@ export class Web {
         }
 
         this.arca.onNotification = (response: Response) => {
-            log.info({
-                location: 'Web.arca.onNotification',
-                response,
-            });
             Object.values(clients).forEach(client => {
                 if (response.Context) {
                     if (response.Context.Source) {
@@ -113,10 +109,6 @@ export class Web {
                 Targets: [],
             };
             socket.on('jsonrpc', async (request: Request) => {
-                log.info({
-                    location: 'Web.on:jsonrpc',
-                    request,
-                });
                 if (request instanceof Object) {
                     if ((request.Method === 'Subscribe') ||
                         (request.Method === 'Unsubscribe')) {
@@ -136,6 +128,7 @@ export class Web {
                     } catch(err) {
                         const error = err as Error;
                         log.error({
+                            request,
                             location: 'Web.on:jsonrpc.request',
                             error,
                         })
@@ -149,6 +142,7 @@ export class Web {
                         }
                     };
                     log.error({
+                        request,
                         location: 'Web.on:jsonrpc.checkRequest',
                         responseError,
                     });
