@@ -166,7 +166,6 @@ export function defineAPI(
             resolve: (value: Response | PromiseLike<Response>) => void,
             reject: (reason: NodeJS.ErrnoException) => void,
         ) => {
-            arca.once('error', reject);
             arca.write(`${JSON.stringify(request)}\n`);
             try {
                 const response = await bus.getResponseByID(request.ID, waitForResponseTimeout);
@@ -183,7 +182,6 @@ export function defineAPI(
                 });
                 reject(err);
             }
-            arca.off('error', reject);
         });
     };
 
