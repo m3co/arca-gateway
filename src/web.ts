@@ -50,10 +50,140 @@ export class Web {
         this.config = parse(readFileSync(configLocation, 'utf-8'));
         this.arca = params.arca;
         this.proxy = params.proxy;
+        this.arca.onNotification = this.onNotificationFromArca;
     };
 
+    subscribe = (id: string, params: {Source?: string, Target?: string}) => {
+        const { clients } = this;
+        if (params.Source) {
+            clients[id].Sources.push(params.Source);
+        }
+        if (params.Target) {
+            clients[id].Targets.push(params.Target);
+        }
+    }
+
+    unsubscribe = (id: string, params: {Source?: string, Target?: string}) => {
+        const { clients } = this;
+        if (params.Source) {
+            clients[id].Sources = clients[id].Sources.filter(source =>
+                source !== params.Source);
+        }
+        if (params.Target) {
+            clients[id].Targets = clients[id].Targets.filter(target =>
+                target !== params.Target);
+        }
+    }
+
+    onNotificationFromArca = (response: Response) => {
+        const { clients } = this;
+        Object.values(clients).forEach(client => {
+            if (response.Context) {
+                if (response.Context.Source) {
+                    const found = client.Sources.find((source) =>
+                        source === response.Context.Source);
+                    if (found) {
+                        client.socket.emit('jsonrpc', response);
+                    }
+                }
+                if (response.Context.Target) {
+                    const found = client.Targets.find((target) =>
+                        target === response.Context.Target);
+                    if (found) {
+                        client.socket.emit('jsonrpc', response);
+                    }
+                }
+
+            }
+        });
+    }
+
+    processSubscribeUnsubscribe = (socket: SocketIO.Socket, request: Request): boolean => {
+        const { subscribe, unsubscribe } = this;
+        const subunsub = {
+            'Subscribe': subscribe,
+            'Unsubscribe': unsubscribe,
+        }
+        if ((request.Method === 'Subscribe') ||
+            (request.Method === 'Unsubscribe')) {
+            if (request.Params) {
+                const response = {
+                    ID: request.ID,
+                    Method: request.Method,
+                    Context: {...request.Params},
+                    Result: true,
+                };
+                subunsub[request.Method](socket.id, request.Params);
+                socket.emit('jsonrpc', response);
+            } else {
+                const responseError = {
+                    ID: request.ID,
+                    Method: 'socket.on::jsonrpc::processSubscribeUnsubscribe',
+                    Context: request.Context,
+                    Error: {
+                        Code: -32703,
+                        Message: `Request ${request.Method} must have the Params object defined`,
+                    }
+                };
+                socket.emit('jsonrpc', responseError);
+            }
+            return true;
+        }
+        return false
+    }
+
+    processRequestInArca = async (socket: SocketIO.Socket, request: Request) => {
+        const { arca } = this
+        try {
+            const response = await arca.request(request);
+            socket.emit('jsonrpc', response);
+        } catch(err) {
+            const error = err as Error;
+            log.error({
+                request,
+                location: 'Web.on:jsonrpc.request',
+                error,
+            });
+
+            const responseError = {
+                ID: request.ID,
+                Method: 'socket.on::jsonrpc::processRequestInArca',
+                Context: request.Context,
+                Error: {
+                    Code: -32705,
+                    Message: error.message,
+                }
+            };
+            socket.emit('jsonrpc', responseError);
+            return false;
+        }
+        return true;
+    }
+
+    processRequest = (socket: SocketIO.Socket) => async (request: Request) => {
+        const { processSubscribeUnsubscribe, processRequestInArca } = this;
+        if (request instanceof Object) {
+            processSubscribeUnsubscribe(socket, request) ||
+            processRequestInArca(socket, request);
+        } else {
+            const responseError = {
+                Method: 'socket.on::jsonrpc',
+                Error: {
+                    Code: -32700,
+                    Message: 'Parse error',
+                }
+            };
+            log.error({
+                request,
+                location: 'Web.on:jsonrpc.checkRequest',
+                responseError,
+            });
+            socket.emit('jsonrpc', responseError);
+        }
+    }
+
     listen(retryToConnectTimeout: number = 1000) {
-        const { arca, io, proxy, config, clients } = this;
+        const { arca, io, proxy, config, clients, processRequest } = this;
 
         if (proxy) {
             proxy.listen(config.port)
@@ -61,95 +191,13 @@ export class Web {
             io.listen(config.port);
         }
 
-        const doit = {
-            'Subscribe': function(id: string, params: {Source?: string, Target?: string}) {
-                if (params.Source) {
-                    clients[id].Sources.push(params.Source);
-                }
-                if (params.Target) {
-                    clients[id].Targets.push(params.Target);
-                }
-            },
-            'Unsubscribe': function(id: string, params: {Source?: string, Target?: string}) {
-                if (params.Source) {
-                    clients[id].Sources = clients[id].Sources.filter(source =>
-                        source !== params.Source);
-                }
-                if (params.Target) {
-                    clients[id].Targets = clients[id].Targets.filter(target =>
-                        target !== params.Target);
-                }
-            }
-        }
-
-        this.arca.onNotification = (response: Response) => {
-            Object.values(clients).forEach(client => {
-                if (response.Context) {
-                    if (response.Context.Source) {
-                        const found = client.Sources.find((source) => source === response.Context.Source);
-                        if (found) {
-                            client.socket.emit('jsonrpc', response);
-                        }
-                    }
-                    if (response.Context.Target) {
-                        const found = client.Targets.find((target) => target === response.Context.Target);
-                        if (found) {
-                            client.socket.emit('jsonrpc', response);
-                        }
-                    }
-
-                }
-            });
-        };
-
         io.on('connect', (socket: SocketIO.Socket) => {
             clients[socket.id] = {
                 socket,
                 Sources: [],
                 Targets: [],
             };
-            socket.on('jsonrpc', async (request: Request) => {
-                if (request instanceof Object) {
-                    if ((request.Method === 'Subscribe') ||
-                        (request.Method === 'Unsubscribe')) {
-                        const response = {
-                            ID: request.ID,
-                            Method: request.Method,
-                            Context: {...request.Params},
-                            Result: true,
-                        };
-                        request.Params && doit[request.Method](socket.id, request.Params);
-                        socket.emit('jsonrpc', response);
-                        return
-                    }
-                    try {
-                        const response = await arca.request(request);
-                        socket.emit('jsonrpc', response);
-                    } catch(err) {
-                        const error = err as Error;
-                        log.error({
-                            request,
-                            location: 'Web.on:jsonrpc.request',
-                            error,
-                        })
-                    }
-                } else {
-                    const responseError = {
-                        Method: 'socket.on::jsonrpc',
-                        Error: {
-                            Code: -32700,
-                            Message: 'Parse error',
-                        }
-                    };
-                    log.error({
-                        request,
-                        location: 'Web.on:jsonrpc.checkRequest',
-                        responseError,
-                    });
-                    socket.emit('jsonrpc', responseError);
-                }
-            });
-
+            socket.on('jsonrpc', processRequest(socket));
             socket.on('disconnect', () => {
                 delete clients[socket.id];
             });
