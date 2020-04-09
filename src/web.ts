@@ -122,7 +122,35 @@ export class Web {
                     Context: request.Context,
                     Error: {
                         Code: -32703,
-                        Message: `Request ${request.Method} must have the Params object defined`,
+                        Message: `Request ${request.Method} must have the Params object defined at ${request.Method}`,
+                    }
+                };
+                socket.emit('jsonrpc', responseError);
+            }
+            return true;
+        }
+        return false
+    }
+
+    processFilter = (socket: SocketIO.Socket, request: Request): boolean => {
+        if (request.Method === 'Filter') {
+            if (request.Params) {
+                const response = {
+                    ID: request.ID,
+                    Method: request.Method,
+                    Context: {...request.Context},
+                    Result: true,
+                };
+                // something must go here
+                socket.emit('jsonrpc', response);
+            } else {
+                const responseError = {
+                    ID: request.ID,
+                    Method: 'socket.on::jsonrpc::processFilter',
+                    Context: request.Context,
+                    Error: {
+                        Code: -32703,
+                        Message: `Request ${request.Method} must have the Params object defined at ${request.Method}`,
                     }
                 };
                 socket.emit('jsonrpc', responseError);
@@ -161,8 +189,9 @@ export class Web {
     }
 
     processRequest = (socket: SocketIO.Socket) => async (request: Request) => {
-        const { processSubscribeUnsubscribe, processRequestInArca } = this;
+        const { processFilter, processSubscribeUnsubscribe, processRequestInArca } = this;
         if (request instanceof Object) {
+            processFilter(socket, request) ||
             processSubscribeUnsubscribe(socket, request) ||
             processRequestInArca(socket, request);
         } else {
