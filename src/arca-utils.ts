@@ -6,6 +6,7 @@ import { ECONNRESET, ECONNREFUSED,
     Request, Response } from './types';
 import { Arca } from './arca';
 
+const TIMEOUT = 4000;
 const log = createLogger({
     name: 'arca-server',
     streams: [{
@@ -53,7 +54,7 @@ export const prepareHandler = (obj: Arca): {
         callbacks = callbacks.filter(callback => callback !== currentCallback);
     }
 
-    const getResponseByID = (ID: string, waitForResponseTimeout: number = 4000): Promise<Response> => {
+    const getResponseByID = (ID: string, waitForResponseTimeout: number = TIMEOUT): Promise<Response> => {
         return new Promise<Response>((
             resolve: (value: Response | PromiseLike<Response>) => void,
             reject: (reason: Error) => void,
@@ -150,7 +151,7 @@ export function defineAPI(
         arca.end();
     };
 
-    const request = (request: Request, waitForResponseTimeout: number = 1000): Promise<Response> => {
+    const request = (request: Request, waitForResponseTimeout: number = TIMEOUT): Promise<Response> => {
         return new Promise<Response>(async (
             resolve: (value: Response | PromiseLike<Response>) => void,
             reject: (reason: NodeJS.ErrnoException) => void,
