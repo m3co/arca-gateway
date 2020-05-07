@@ -3,10 +3,9 @@ import * as SocketIO from 'socket.io-client';
 
 import { Web } from './web';
 import { Arca } from './arca';
-import { v4 as uuidv4 } from 'uuid';
 import { Response } from './types';
 
-test('Request Filter a source returns a response', async () => {
+test('Request Select a source returns a response', async () => {
     const arca = new Arca();
     arca.config.arca.port = '22346';
 
@@ -16,18 +15,20 @@ test('Request Filter a source returns a response', async () => {
 
     const request = {
         ID: 'id-of-error',
-        Method: 'Filter',
+        Method: 'Select',
         Context: {
             Source: 'test'
         },
         Params: {
-            ProjectID: 5,
-            Key: '1.1'
+            PK: {
+                ProjectID: 5,
+                Key: '1.1'
+            },
         }
     };
     const expectedResponse = {
         ID: 'id-of-error',
-        Method: 'Filter',
+        Method: 'Select',
         Context: { Source: 'test' },
         Result: true
     }

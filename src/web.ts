@@ -132,13 +132,13 @@ export class Web {
         return false
     }
 
-    processFilter = (socket: SocketIO.Socket, request: Request): boolean => {
-        if (request.Method === 'Filter') {
+    processSelect = (socket: SocketIO.Socket, request: Request): boolean => {
+        if (request.Method === 'Select') {
             if (request.Params) {
                 const response = {
                     ID: request.ID,
                     Method: request.Method,
-                    Context: {...request.Context},
+                    Context: request.Context,
                     Result: true,
                 };
                 // something must go here
@@ -146,7 +146,7 @@ export class Web {
             } else {
                 const responseError = {
                     ID: request.ID,
-                    Method: 'socket.on::jsonrpc::processFilter',
+                    Method: 'socket.on::jsonrpc::processSelect',
                     Context: request.Context,
                     Error: {
                         Code: -32703,
@@ -189,9 +189,9 @@ export class Web {
     }
 
     processRequest = (socket: SocketIO.Socket) => async (request: Request) => {
-        const { processFilter, processSubscribeUnsubscribe, processRequestInArca } = this;
+        const { processSelect, processSubscribeUnsubscribe, processRequestInArca } = this;
         if (request instanceof Object) {
-            processFilter(socket, request) ||
+            processSelect(socket, request) ||
             processSubscribeUnsubscribe(socket, request) ||
             processRequestInArca(socket, request);
         } else {

@@ -1,16 +1,16 @@
 
 # Filtros
 
-Al momento de requerir una tabla, se hace necesario filtrar los datos.
+Al momento de ejecutar `Select` en una tabla, se hace necesario filtrar los datos.
 
 ## Casos en un solo ejemplo
 
 ```json
 {
     "ID": "ID",
-    "Method": "Filter",
+    "Method": "Select",
     "Params": {
-        "Row": {
+        "PK": {
             "ProjectID": 5,
             "Key": ["1.3", "1.3.%"],
             "Level": "Nivel 2"
