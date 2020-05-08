@@ -28,6 +28,9 @@ export class Web {
     private clients: {
         [key: string]: {
             socket: SocketIO.Socket,
+            filter: {
+                [key: string]: string | number | boolean | null;
+            },
             Sources: string[],
             Targets: string[]
         }
@@ -129,7 +132,7 @@ export class Web {
             }
             return true;
         }
-        return false
+        return false;
     }
 
     processSelect = (socket: SocketIO.Socket, request: Request): boolean => {
@@ -141,8 +144,22 @@ export class Web {
                     Context: request.Context,
                     Result: [],
                 };
-                // something must go here
-                socket.emit('jsonrpc', response);
+                const filter = request.Params["PK"];
+                if (filter) {
+                    this.clients[socket.id].filter = filter;
+                    return false; // let ARCA process this request
+                } else {
+                    const responseError = {
+                        ID: request.ID,
+                        Method: 'socket.on::jsonrpc::processSelect::filter',
+                        Context: request.Context,
+                        Error: {
+                            Code: -32703,
+                            Message: `Params must contain a PK object`,
+                        }
+                    };
+                    socket.emit('jsonrpc', responseError);
+                }
             } else {
                 const responseError = {
                     ID: request.ID,
@@ -157,7 +174,7 @@ export class Web {
             }
             return true;
         }
-        return false
+        return false;
     }
 
     processRequestInArca = async (socket: SocketIO.Socket, request: Request) => {
@@ -223,6 +240,7 @@ export class Web {
         io.on('connect', (socket: SocketIO.Socket) => {
             clients[socket.id] = {
                 socket,
+                filter: {},
                 Sources: [],
                 Targets: [],
             };

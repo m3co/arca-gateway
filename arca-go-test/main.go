@@ -241,6 +241,13 @@ func handleRequest(conn net.Conn) {
 		handleRequest(conn)
 	}
 
+	if request.Method == "Select" {
+		response.Result = []string{}
+		response.Method = request.Method
+		responseMsg2, _ := json.Marshal(response)
+		conn.Write(responseMsg2)
+	}
+
 	conn.Write(([]byte("\n")))
 	// Close the connection when you're done with it.
 	conn.Close()

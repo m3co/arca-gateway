@@ -29,6 +29,7 @@ test('Request Select (fake) a source returns a response with empty array', async
     const expectedResponse = {
         ID: 'id-of-error',
         Method: 'Select',
+        Error: null,
         Context: { Source: 'test' },
         Result: []
     }
