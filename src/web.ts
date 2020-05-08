@@ -139,7 +139,7 @@ export class Web {
                     ID: request.ID,
                     Method: request.Method,
                     Context: request.Context,
-                    Result: true,
+                    Result: [],
                 };
                 // something must go here
                 socket.emit('jsonrpc', response);

@@ -5,7 +5,7 @@ import { Web } from './web';
 import { Arca } from './arca';
 import { Response } from './types';
 
-test('Request Select a source returns a response', async () => {
+test('Request Select (fake) a source returns a response with empty array', async () => {
     const arca = new Arca();
     arca.config.arca.port = '22346';
 
@@ -30,12 +30,14 @@ test('Request Select a source returns a response', async () => {
         ID: 'id-of-error',
         Method: 'Select',
         Context: { Source: 'test' },
-        Result: true
+        Result: []
     }
 
     try {
         await new Promise(resolve => {
             client.on('jsonrpc', (res: Response) => {
+                client.disconnect();
+                web.close();
                 expect(res).toStrictEqual(expectedResponse);
                 resolve();
             });
