@@ -31,8 +31,12 @@ export class Web {
             filter: {
                 [key: string]: string | number | boolean | null;
             },
-            Sources: string[],
-            Targets: string[]
+            Sources: {
+                [key: string]: {}
+            },
+            Targets: {
+                [key: string]: {}
+            }
         }
     } = {};
     constructor(params: {
@@ -59,22 +63,20 @@ export class Web {
     subscribe = (id: string, params: {Source?: string, Target?: string}) => {
         const { clients } = this;
         if (params.Source) {
-            clients[id].Sources.push(params.Source);
+            clients[id].Sources[params.Source] = {};
         }
         if (params.Target) {
-            clients[id].Targets.push(params.Target);
+            clients[id].Targets[params.Target] = {};
         }
     }
 
     unsubscribe = (id: string, params: {Source?: string, Target?: string}) => {
         const { clients } = this;
         if (params.Source) {
-            clients[id].Sources = clients[id].Sources.filter(source =>
-                source !== params.Source);
+            clients[id].Sources = clients[id].Sources[params.Source] = {};
         }
         if (params.Target) {
-            clients[id].Targets = clients[id].Targets.filter(target =>
-                target !== params.Target);
+            clients[id].Targets = clients[id].Targets[params.Target] = {};
         }
     }
 
@@ -83,15 +85,13 @@ export class Web {
         Object.values(clients).forEach(client => {
             if (response.Context) {
                 if (response.Context.Source) {
-                    const found = client.Sources.find((source) =>
-                        source === response.Context.Source);
+                    const found = client.Sources[response.Context.Source];
                     if (found) {
                         client.socket.emit('jsonrpc', response);
                     }
                 }
                 if (response.Context.Target) {
-                    const found = client.Targets.find((target) =>
-                        target === response.Context.Target);
+                    const found = client.Targets[response.Context.Target];
                     if (found) {
                         client.socket.emit('jsonrpc', response);
                     }
@@ -241,8 +241,8 @@ export class Web {
             clients[socket.id] = {
                 socket,
                 filter: {},
-                Sources: [],
-                Targets: [],
+                Sources: {},
+                Targets: {},
             };
             socket.on('jsonrpc', processRequest(socket));
             socket.on('disconnect', () => {
