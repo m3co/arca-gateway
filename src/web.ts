@@ -28,14 +28,19 @@ export class Web {
     private clients: {
         [key: string]: {
             socket: SocketIO.Socket,
-            filter: {
-                [key: string]: string | number | boolean | null;
-            },
             Sources: {
-                [key: string]: {}
+                [key: string]: {
+                    filter: {
+                        [key: string]: string | number | boolean | null;
+                    },
+                }
             },
             Targets: {
-                [key: string]: {}
+                [key: string]: {
+                    filter: {
+                        [key: string]: string | number | boolean | null;
+                    },
+                }
             }
         }
     } = {};
@@ -63,20 +68,28 @@ export class Web {
     subscribe = (id: string, params: {Source?: string, Target?: string}) => {
         const { clients } = this;
         if (params.Source) {
-            clients[id].Sources[params.Source] = {};
+            if (!clients[id].Sources[params.Source]) {
+                clients[id].Sources[params.Source] = {
+                    filter: {}
+                };
+            }
         }
         if (params.Target) {
-            clients[id].Targets[params.Target] = {};
+            if (!clients[id].Targets[params.Target]) {
+                clients[id].Targets[params.Target] = {
+                    filter: {}
+                };
+            }
         }
     }
 
     unsubscribe = (id: string, params: {Source?: string, Target?: string}) => {
         const { clients } = this;
         if (params.Source) {
-            clients[id].Sources = clients[id].Sources[params.Source] = {};
+            delete clients[id].Sources[params.Source];
         }
         if (params.Target) {
-            clients[id].Targets = clients[id].Targets[params.Target] = {};
+            delete clients[id].Targets[params.Target];
         }
     }
 
@@ -136,6 +149,7 @@ export class Web {
     }
 
     processSelect = (socket: SocketIO.Socket, request: Request): boolean => {
+        const { clients } = this;
         if (request.Method === 'Select') {
             if (request.Params) {
                 const response = {
@@ -146,8 +160,22 @@ export class Web {
                 };
                 const filter = request.Params["PK"];
                 if (filter) {
-                    this.clients[socket.id].filter = filter;
-                    return false; // let ARCA process this request
+                    const source = request.Context["Source"];
+                    if (source) {
+                        clients[socket.id].Sources[source] = { filter };
+                        return false; // let ARCA to process this request
+                    } else {
+                        const responseError = {
+                            ID: request.ID,
+                            Method: 'socket.on::jsonrpc::processSelect::filter',
+                            Context: request.Context,
+                            Error: {
+                                Code: -32703,
+                                Message: `Select requires a Source in the Context`,
+                            }
+                        };
+                        socket.emit('jsonrpc', responseError);
+                    }
                 } else {
                     const responseError = {
                         ID: request.ID,
@@ -240,7 +268,6 @@ export class Web {
         io.on('connect', (socket: SocketIO.Socket) => {
             clients[socket.id] = {
                 socket,
-                filter: {},
                 Sources: {},
                 Targets: {},
             };
