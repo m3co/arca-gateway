@@ -3,7 +3,7 @@ import { Socket } from 'net';
 import { createLogger } from 'bunyan';
 import { ECONNRESET, ECONNREFUSED,
     errorUnexpectedEndJSONInput,
-    Request, Response } from './types';
+    Request, Response, Notification } from './types';
 import { Arca } from './arca';
 
 const TIMEOUT = 4000;
@@ -84,12 +84,12 @@ export const prepareHandler = (obj: Arca): {
 
     return {
         handler: processData({
-            processResponses: (responses: Response[]): void => {
+            processResponses: (responses: (Response | Notification)[]): void => {
                 responses.forEach(response => {
-                    if (response.ID) {
-                        responseQueue.push(response);
+                    if ((<Response>response).ID) {
+                        responseQueue.push(<Response>response);
                     } else {
-                        obj.onNotification(response);
+                        obj.onNotification(<Notification>response);
                     }
                 });
                 callbacks.forEach(callback => callback());
