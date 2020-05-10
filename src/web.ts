@@ -150,51 +150,20 @@ export class Web {
     processSelect = (socket: SocketIO.Socket, request: Request): boolean => {
         const { clients } = this;
         if (request.Method === 'Select') {
-            if (request.Params) {
-                const response = {
-                    ID: request.ID,
-                    Method: request.Method,
-                    Context: request.Context,
-                    Result: [],
-                };
-                const filter = request.Params["PK"];
-                if (filter) {
-                    const source = request.Context["Source"];
-                    if (source) {
-                        clients[socket.id].Sources[source] = { filter };
-                        return false; // let ARCA to process this request
-                    } else {
-                        const responseError = {
-                            ID: request.ID,
-                            Method: 'socket.on::jsonrpc::processSelect::filter',
-                            Context: request.Context,
-                            Error: {
-                                Code: -32703,
-                                Message: `Select requires a Source in the Context`,
-                            }
-                        };
-                        socket.emit('jsonrpc', responseError);
-                    }
-                } else {
-                    const responseError = {
-                        ID: request.ID,
-                        Method: 'socket.on::jsonrpc::processSelect::filter',
-                        Context: request.Context,
-                        Error: {
-                            Code: -32703,
-                            Message: `Params must contain a PK object`,
-                        }
-                    };
-                    socket.emit('jsonrpc', responseError);
-                }
+            if (!request.Params) request.Params = {};
+            const filter = request.Params["PK"] || {};
+            const source = request.Context["Source"];
+            if (source) {
+                clients[socket.id].Sources[source] = { filter };
+                return false; // let ARCA to process this request
             } else {
                 const responseError = {
                     ID: request.ID,
-                    Method: 'socket.on::jsonrpc::processSelect',
+                    Method: 'socket.on::jsonrpc::processSelect::filter',
                     Context: request.Context,
                     Error: {
                         Code: -32703,
-                        Message: `Request ${request.Method} must have the Params object defined at ${request.Method}`,
+                        Message: `Select requires a Source in the Context`,
                     }
                 };
                 socket.emit('jsonrpc', responseError);
