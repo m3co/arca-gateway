@@ -6,7 +6,7 @@ import { Server } from 'http';
 import { createLogger } from 'bunyan';
 
 import { Arca } from './arca';
-import { Request, Response } from './types';
+import { Request, Notification } from './types';
 
 const log = createLogger({
     name: 'arca-web',
@@ -14,6 +14,10 @@ const log = createLogger({
         path: './arca-web.log',
     }]
 });
+
+type Filter = {
+    [key: string]: string | number | boolean | null;
+}
 
 export class Web {
     public config: {
@@ -30,16 +34,12 @@ export class Web {
             socket: SocketIO.Socket,
             Sources: {
                 [key: string]: {
-                    filter: {
-                        [key: string]: string | number | boolean | null;
-                    },
+                    filter: Filter,
                 }
             },
             Targets: {
                 [key: string]: {
-                    filter: {
-                        [key: string]: string | number | boolean | null;
-                    },
+                    filter: Filter,
                 }
             }
         }
@@ -93,23 +93,23 @@ export class Web {
         }
     }
 
-    onNotificationFromArca = (response: Response) => {
+    onNotificationFromArca = (response: Notification) => {
         const { clients } = this;
         Object.values(clients).forEach(client => {
+            let foundFilter: Filter | null = null;
             if (response.Context) {
                 if (response.Context.Source) {
-                    const found = client.Sources[response.Context.Source];
-                    if (found) {
-                        client.socket.emit('jsonrpc', response);
+                    if (client.Sources[response.Context.Source]) {
+                        foundFilter = client.Sources[response.Context.Source].filter;
+                    }
+                } else if (response.Context.Target) {
+                    if (client.Targets[response.Context.Target]) {
+                        foundFilter = client.Targets[response.Context.Target].filter;
                     }
                 }
-                if (response.Context.Target) {
-                    const found = client.Targets[response.Context.Target];
-                    if (found) {
-                        client.socket.emit('jsonrpc', response);
-                    }
-                }
-
+            }
+            if (foundFilter) {
+                client.socket.emit('jsonrpc', response);
             }
         });
     }

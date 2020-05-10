@@ -9,7 +9,6 @@ export interface Response {
     Context: {
         Source: string;
         Target: string;
-        Notification: true;
     };
     Result: {
         [key: string]: string;
@@ -18,6 +17,21 @@ export interface Response {
         Code: number;
         Message: string;
     } | null
+}
+
+export interface Notification {
+    Method: string;
+    Context: {
+        Source: string;
+        Target: string;
+        Notification: true;
+    };
+    Row: {
+        [key: string]: null | number | boolean | string;
+    };
+    PK: {
+        [key: string]: null | number | boolean | string;
+    };
 }
 
 export interface Request {

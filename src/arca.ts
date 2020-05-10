@@ -2,7 +2,7 @@
 import { readFileSync } from 'fs';
 import { parse } from 'ini';
 
-import { Response, Request } from './types';
+import { Response, Notification, Request } from './types';
 import { defineAPI } from './arca-utils';
 
 export class Arca {
@@ -15,15 +15,15 @@ export class Arca {
     public connect: (retryToConnectTimeout?: number) => Promise<void>;
     public disconnect: () => void;
     public request: (request: Request, waitForResponseTimeout?: number) => Promise<Response>;
-    public onNotification: (notification: Response) => void
+    public onNotification: (notification: Notification) => void
 
     constructor(params?: {
         configLocation?: string,
-        onNotification?: (notification: Response) => void,
+        onNotification?: (notification: Notification) => void,
     }) {
         const defaultParams = {
             configLocation: 'config.ini',
-            onNotification: (notification: Response): void => {}
+            onNotification: (notification: Notification): void => {}
         };
 
         const { configLocation, onNotification } = {...defaultParams, ...(params || {})};
