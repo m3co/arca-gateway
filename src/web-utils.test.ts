@@ -76,3 +76,21 @@ test('canSendNotification rowPK has one key, filterPK has more than one key -> f
     const filterPK = { ID: 'string', Key: 'something else' };
     expect(canSendNotification(filterPK, rowPK)).toBe(false);
 });
+
+test('canSendNotification rowPK is string, filterPK has % at the start and at the end -> true', () => {
+    const rowPK = { ID: 'string' };
+    const filterPK = { ID: '%ri%' };
+    expect(canSendNotification(filterPK, rowPK)).toBe(true);
+});
+
+test('canSendNotification rowPK is string, filterPK has % at the start -> true', () => {
+    const rowPK = { ID: 'string' };
+    const filterPK = { ID: '%ring' };
+    expect(canSendNotification(filterPK, rowPK)).toBe(true);
+});
+
+test('canSendNotification rowPK is string, filterPK has % at the end -> true', () => {
+    const rowPK = { ID: 'string' };
+    const filterPK = { ID: 'str%' };
+    expect(canSendNotification(filterPK, rowPK)).toBe(true);
+});
