@@ -6,7 +6,8 @@ import { Server } from 'http';
 import { createLogger } from 'bunyan';
 
 import { Arca } from './arca';
-import { Request, Notification } from './types';
+import { Request, Notification, PK } from './types';
+import { canSendNotification } from './web-utils';
 
 const log = createLogger({
     name: 'arca-web',
@@ -14,10 +15,6 @@ const log = createLogger({
         path: './arca-web.log',
     }]
 });
-
-type Filter = {
-    [key: string]: string | number | boolean | null;
-}
 
 export class Web {
     public config: {
@@ -34,12 +31,12 @@ export class Web {
             socket: SocketIO.Socket,
             Sources: {
                 [key: string]: {
-                    filter: Filter,
+                    filter: PK,
                 }
             },
             Targets: {
                 [key: string]: {
-                    filter: Filter,
+                    filter: PK,
                 }
             }
         }
@@ -93,23 +90,25 @@ export class Web {
         }
     }
 
-    onNotificationFromArca = (response: Notification) => {
+    onNotificationFromArca = (notification: Notification) => {
         const { clients } = this;
         Object.values(clients).forEach(client => {
-            let foundFilter: Filter | null = null;
-            if (response.Context) {
-                if (response.Context.Source) {
-                    if (client.Sources[response.Context.Source]) {
-                        foundFilter = client.Sources[response.Context.Source].filter;
+            let foundFilter: PK | null = null;
+            if (notification.Context) {
+                if (notification.Context.Source) {
+                    if (client.Sources[notification.Context.Source]) {
+                        foundFilter = client.Sources[notification.Context.Source].filter;
                     }
-                } else if (response.Context.Target) {
-                    if (client.Targets[response.Context.Target]) {
-                        foundFilter = client.Targets[response.Context.Target].filter;
+                } else if (notification.Context.Target) {
+                    if (client.Targets[notification.Context.Target]) {
+                        foundFilter = client.Targets[notification.Context.Target].filter;
                     }
                 }
             }
             if (foundFilter) {
-                client.socket.emit('jsonrpc', response);
+                if (canSendNotification(foundFilter, notification.PK)) {
+                    client.socket.emit('jsonrpc', notification);
+                }
             }
         });
     }

@@ -3,6 +3,10 @@ export const ECONNRESET = 'ECONNRESET';
 export const ECONNREFUSED = 'ECONNREFUSED';
 export const errorUnexpectedEndJSONInput = 'Unexpected end of JSON input'.toLowerCase();
 
+export type PK = {
+    [key: string]: string | number | boolean | null;
+}
+
 export interface Response {
     ID?: string;
     Method: string;
@@ -29,9 +33,7 @@ export interface Notification {
     Row: {
         [key: string]: null | number | boolean | string;
     };
-    PK: {
-        [key: string]: null | number | boolean | string;
-    };
+    PK: PK;
 }
 
 export interface Request {
