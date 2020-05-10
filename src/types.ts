@@ -3,13 +3,16 @@ export const ECONNRESET = 'ECONNRESET';
 export const ECONNREFUSED = 'ECONNREFUSED';
 export const errorUnexpectedEndJSONInput = 'Unexpected end of JSON input'.toLowerCase();
 
+export type PK = {
+    [key: string]: string | number | boolean | null;
+}
+
 export interface Response {
     ID?: string;
     Method: string;
     Context: {
         Source: string;
         Target: string;
-        Notification: true;
     };
     Result: {
         [key: string]: string;
@@ -18,6 +21,19 @@ export interface Response {
         Code: number;
         Message: string;
     } | null
+}
+
+export interface Notification {
+    Method: string;
+    Context: {
+        Source: string;
+        Target: string;
+        Notification: true;
+    };
+    Row: {
+        [key: string]: null | number | boolean | string;
+    };
+    PK: PK;
 }
 
 export interface Request {

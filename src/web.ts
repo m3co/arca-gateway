@@ -6,7 +6,8 @@ import { Server } from 'http';
 import { createLogger } from 'bunyan';
 
 import { Arca } from './arca';
-import { Request, Response } from './types';
+import { Request, Notification, PK } from './types';
+import { canSendNotification } from './web-utils';
 
 const log = createLogger({
     name: 'arca-web',
@@ -28,8 +29,16 @@ export class Web {
     private clients: {
         [key: string]: {
             socket: SocketIO.Socket,
-            Sources: string[],
-            Targets: string[]
+            Sources: {
+                [key: string]: {
+                    filter: PK,
+                }
+            },
+            Targets: {
+                [key: string]: {
+                    filter: PK,
+                }
+            }
         }
     } = {};
     constructor(params: {
@@ -56,44 +65,50 @@ export class Web {
     subscribe = (id: string, params: {Source?: string, Target?: string}) => {
         const { clients } = this;
         if (params.Source) {
-            clients[id].Sources.push(params.Source);
+            if (!clients[id].Sources[params.Source]) {
+                clients[id].Sources[params.Source] = {
+                    filter: {}
+                };
+            }
         }
         if (params.Target) {
-            clients[id].Targets.push(params.Target);
+            if (!clients[id].Targets[params.Target]) {
+                clients[id].Targets[params.Target] = {
+                    filter: {}
+                };
+            }
         }
     }
 
     unsubscribe = (id: string, params: {Source?: string, Target?: string}) => {
         const { clients } = this;
         if (params.Source) {
-            clients[id].Sources = clients[id].Sources.filter(source =>
-                source !== params.Source);
+            delete clients[id].Sources[params.Source];
         }
         if (params.Target) {
-            clients[id].Targets = clients[id].Targets.filter(target =>
-                target !== params.Target);
+            delete clients[id].Targets[params.Target];
         }
     }
 
-    onNotificationFromArca = (response: Response) => {
+    onNotificationFromArca = (notification: Notification) => {
         const { clients } = this;
         Object.values(clients).forEach(client => {
-            if (response.Context) {
-                if (response.Context.Source) {
-                    const found = client.Sources.find((source) =>
-                        source === response.Context.Source);
-                    if (found) {
-                        client.socket.emit('jsonrpc', response);
+            let foundFilter: PK | null = null;
+            if (notification.Context) {
+                if (notification.Context.Source) {
+                    if (client.Sources[notification.Context.Source]) {
+                        foundFilter = client.Sources[notification.Context.Source].filter;
+                    }
+                } else if (notification.Context.Target) {
+                    if (client.Targets[notification.Context.Target]) {
+                        foundFilter = client.Targets[notification.Context.Target].filter;
                     }
                 }
-                if (response.Context.Target) {
-                    const found = client.Targets.find((target) =>
-                        target === response.Context.Target);
-                    if (found) {
-                        client.socket.emit('jsonrpc', response);
-                    }
+            }
+            if (foundFilter) {
+                if (canSendNotification(foundFilter, notification.PK)) {
+                    client.socket.emit('jsonrpc', notification);
                 }
-
             }
         });
     }
@@ -122,14 +137,71 @@ export class Web {
                     Context: request.Context,
                     Error: {
                         Code: -32703,
-                        Message: `Request ${request.Method} must have the Params object defined`,
+                        Message: `Request ${request.Method} must have the Params object defined at ${request.Method}`,
                     }
                 };
                 socket.emit('jsonrpc', responseError);
             }
             return true;
         }
-        return false
+        return false;
+    }
+
+    processSelect = (socket: SocketIO.Socket, request: Request): boolean => {
+        const { clients } = this;
+        if (request.Method === 'Select') {
+            if (request.Params) {
+                const response = {
+                    ID: request.ID,
+                    Method: request.Method,
+                    Context: request.Context,
+                    Result: [],
+                };
+                const filter = request.Params["PK"];
+                if (filter) {
+                    const source = request.Context["Source"];
+                    if (source) {
+                        clients[socket.id].Sources[source] = { filter };
+                        return false; // let ARCA to process this request
+                    } else {
+                        const responseError = {
+                            ID: request.ID,
+                            Method: 'socket.on::jsonrpc::processSelect::filter',
+                            Context: request.Context,
+                            Error: {
+                                Code: -32703,
+                                Message: `Select requires a Source in the Context`,
+                            }
+                        };
+                        socket.emit('jsonrpc', responseError);
+                    }
+                } else {
+                    const responseError = {
+                        ID: request.ID,
+                        Method: 'socket.on::jsonrpc::processSelect::filter',
+                        Context: request.Context,
+                        Error: {
+                            Code: -32703,
+                            Message: `Params must contain a PK object`,
+                        }
+                    };
+                    socket.emit('jsonrpc', responseError);
+                }
+            } else {
+                const responseError = {
+                    ID: request.ID,
+                    Method: 'socket.on::jsonrpc::processSelect',
+                    Context: request.Context,
+                    Error: {
+                        Code: -32703,
+                        Message: `Request ${request.Method} must have the Params object defined at ${request.Method}`,
+                    }
+                };
+                socket.emit('jsonrpc', responseError);
+            }
+            return true;
+        }
+        return false;
     }
 
     processRequestInArca = async (socket: SocketIO.Socket, request: Request) => {
@@ -161,8 +233,9 @@ export class Web {
     }
 
     processRequest = (socket: SocketIO.Socket) => async (request: Request) => {
-        const { processSubscribeUnsubscribe, processRequestInArca } = this;
+        const { processSelect, processSubscribeUnsubscribe, processRequestInArca } = this;
         if (request instanceof Object) {
+            processSelect(socket, request) ||
             processSubscribeUnsubscribe(socket, request) ||
             processRequestInArca(socket, request);
         } else {
@@ -194,8 +267,8 @@ export class Web {
         io.on('connect', (socket: SocketIO.Socket) => {
             clients[socket.id] = {
                 socket,
-                Sources: [],
-                Targets: [],
+                Sources: {},
+                Targets: {},
             };
             socket.on('jsonrpc', processRequest(socket));
             socket.on('disconnect', () => {

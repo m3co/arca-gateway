@@ -1,6 +1,6 @@
 
 import { Arca } from './arca';
-import { Request, Response } from './types';
+import { Request, Response, Notification } from './types';
 import { v4 as uuidv4 } from 'uuid';
 
 test('Send a first simple request', async () => {
@@ -97,7 +97,7 @@ test(`Two responses in 1 parts`, async () => {
             },
         };
 
-        const onNotification = (notification: Response) => {
+        const onNotification = (notification: Notification) => {
             expect(notification).toStrictEqual(expectedNotification);
             resolve();
             arca.disconnect();
@@ -139,7 +139,7 @@ test(`Two responses in 2 parts - first response broken, second response ok`, asy
             },
         };
 
-        const onNotification = (notification: Response) => {
+        const onNotification = (notification: Notification) => {
             expect(notification).toStrictEqual(expectedNotification);
             resolve();
             arca.disconnect();
@@ -181,7 +181,7 @@ test(`Two responses in 2 parts - first response ok, second response broken`, asy
             },
         };
 
-        const onNotification = (notification: Response) => {
+        const onNotification = (notification: Notification) => {
             expect(notification).toStrictEqual(expectedNotification);
             resolve();
             arca.disconnect();
@@ -223,7 +223,7 @@ test(`Two responses in 2 parts - first response broken, second response broken`,
             },
         };
 
-        const onNotification = (notification: Response) => {
+        const onNotification = (notification: Notification) => {
             expect(notification).toStrictEqual(expectedNotification);
             resolve();
             arca.disconnect();
@@ -265,7 +265,7 @@ test(`Two responses in 2 parts - first response ok(no EOL), second response brok
             },
         };
 
-        const onNotification = (notification: Response) => {
+        const onNotification = (notification: Notification) => {
             expect(notification).toStrictEqual(expectedNotification);
             resolve();
             arca.disconnect();
@@ -344,7 +344,7 @@ test(`One request - a response and a notification`, async () => {
             },
         };
 
-        const onNotification = (notification: Response) => {
+        const onNotification = (notification: Notification) => {
             expect(notification).toStrictEqual(expectedNotification);
             resolve();
             arca.disconnect();
@@ -383,7 +383,7 @@ test(`Connect and wait - got a response and a notification`, async () => {
             Error: null
         };
 
-        const onNotification = (notification: Response) => {
+        const onNotification = (notification: Notification) => {
             i++;
             if (i > 1) {
                 reject(new Error('unexepected notification'));
@@ -419,7 +419,7 @@ test(`Connect and wait - got a response and a notification but process only the 
             Error: null
         };
 
-        const onNotification = (notification: Response) => {
+        const onNotification = (notification: Notification) => {
             expect(notification).toStrictEqual(expectedNotification);
             resolve();
         }
