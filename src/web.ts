@@ -140,6 +140,11 @@ export class Web {
                         Message: `Request ${request.Method} must have the Params object defined at ${request.Method}`,
                     }
                 };
+                log.error({
+                    request,
+                    location: 'socket.on::jsonrpc::processSubscribeUnsubscribe',
+                    responseError,
+                });
                 socket.emit('jsonrpc', responseError);
             }
             return true;
@@ -166,6 +171,11 @@ export class Web {
                         Message: `Select requires a Source in the Context`,
                     }
                 };
+                log.error({
+                    request,
+                    location: 'socket.on::jsonrpc::processSelect::filter',
+                    responseError,
+                });
                 socket.emit('jsonrpc', responseError);
             }
             return true;
@@ -182,7 +192,7 @@ export class Web {
             const error = err as Error;
             log.error({
                 request,
-                location: 'Web.on:jsonrpc.request',
+                location: 'socket.on:jsonrpc.request',
                 error,
             });
 
@@ -195,6 +205,11 @@ export class Web {
                     Message: error.message,
                 }
             };
+            log.error({
+                request,
+                location: 'socket.on::jsonrpc::processRequestInArca',
+                responseError,
+            });
             socket.emit('jsonrpc', responseError);
             return false;
         }
@@ -217,7 +232,7 @@ export class Web {
             };
             log.error({
                 request,
-                location: 'Web.on:jsonrpc.checkRequest',
+                location: 'socket.on:jsonrpc.checkRequest',
                 responseError,
             });
             socket.emit('jsonrpc', responseError);
