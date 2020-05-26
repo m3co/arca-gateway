@@ -3,7 +3,7 @@ import { readFileSync } from 'fs';
 import { parse } from 'ini';
 
 import { Response, Notification, Request } from './types';
-import { defineAPI } from './arca-utils';
+import { log, defineAPI } from './arca-utils';
 
 export class Arca {
     public config: {
@@ -23,7 +23,7 @@ export class Arca {
     }) {
         const defaultParams = {
             configLocation: 'config.ini',
-            onNotification: (notification: Notification): void => {}
+            onNotification: (notification: Notification): void => { log.error('onNotification not defined'); }
         };
 
         const { configLocation, onNotification } = {...defaultParams, ...(params || {})};

@@ -7,7 +7,7 @@ import { ECONNRESET, ECONNREFUSED,
 import { Arca } from './arca';
 
 const TIMEOUT = 4000;
-const log = createLogger({
+export const log = createLogger({
     name: 'arca-server',
     streams: [{
         path: './arca-server.log',

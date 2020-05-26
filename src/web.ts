@@ -96,12 +96,12 @@ export class Web {
             let foundFilter: PK | null = null;
             if (notification.Context) {
                 if (notification.Context.Source) {
-                    if (client.Sources[notification.Context.Source]) {
-                        foundFilter = client.Sources[notification.Context.Source].filter;
+                    if (client.Sources[notification.Context.Target]) {
+                        foundFilter = client.Sources[notification.Context.Target].filter;
                     }
                 } else if (notification.Context.Target) {
-                    if (client.Targets[notification.Context.Target]) {
-                        foundFilter = client.Targets[notification.Context.Target].filter;
+                    if (client.Targets[notification.Context.Source]) {
+                        foundFilter = client.Targets[notification.Context.Source].filter;
                     }
                 }
             }
