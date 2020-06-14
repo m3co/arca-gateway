@@ -1,6 +1,7 @@
 /node_modules
 .*.sw*
 config.ini
+arca-facad.log
 arca-gateway.log
 arca-server.log
 arca-web.log
