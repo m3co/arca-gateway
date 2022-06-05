@@ -35,7 +35,7 @@ test('Request Select (fake) a source returns a response with empty array', async
     }
 
     try {
-        await new Promise(resolve => {
+        await new Promise((resolve: (value: void) => void) => {
             client.on('jsonrpc', (res: Response) => {
                 client.disconnect();
                 web.close();

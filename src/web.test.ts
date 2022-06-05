@@ -25,7 +25,7 @@ function generateRequestAndResponse() {
 }
 
 function launchRequestWaitResponse(client: SocketIOClient.Socket) {
-    return new Promise((resolve) => {
+    return new Promise((resolve: (value: void) => void) => {
         const { request, expectedResponse } = generateRequestAndResponse();
         client.emit('jsonrpc', request);
         client.once('jsonrpc', (res: any) => {
@@ -39,7 +39,7 @@ test('Check the connection', async () => {
     const web = new Web({ arca: new Arca() });
     const client = SocketIO(`http://localhost:${web.config.port}/`);
 
-    try { await new Promise(async (resolve) => {
+    try { await new Promise(async (resolve: (value: void) => void) => {
         client.on('connect', () => {
             resolve();
         });
@@ -66,7 +66,7 @@ test('Send some requests, await for their responses from an "Arca" instance', as
         web.close();
     }
 
-    try { await new Promise(async (resolve) => {
+    try { await new Promise(async (resolve: (value: void) => void) => {
         await web.listen();
         client.connect();
 
@@ -92,11 +92,11 @@ test('Send an incorrect request and fail', async () => {
         web.close();
     }
 
-    try { await new Promise(async (resolve) => {
+    try { await new Promise(async (resolve: (value: void) => void) => {
         await web.listen();
         client.connect();
 
-        await new Promise(resolve => {
+        await new Promise((resolve: (value: void) => void) => {
             const request = 'something incorrect';
             const expectedResponse = {
                 Method: 'socket.on::jsonrpc',
@@ -133,7 +133,7 @@ test('Send a request, await for its response and skip the notification', async (
         web.close();
     }
 
-    try { await new Promise(async (resolve, reject) => {
+    try { await new Promise(async (resolve: (value: void) => void, reject) => {
         await web.listen();
         client.connect();
 
@@ -188,7 +188,7 @@ test('Check request to subscribe to Source', async () => {
         web.close();
     }
 
-    try { await new Promise(async (resolve) => {
+    try { await new Promise(async (resolve: (value: void) => void) => {
        const request = {
             ID: 'id-of-error',
             Method: 'Subscribe',
@@ -231,7 +231,7 @@ test('Check request to subscribe to Target', async () => {
         web.close();
     }
 
-    try { await new Promise(async (resolve) => {
+    try { await new Promise(async (resolve: (value: void) => void) => {
        const request = {
             ID: 'id-of-error',
             Method: 'Subscribe',
@@ -274,7 +274,7 @@ test('Check request to unsubscribe to Source', async () => {
         web.close();
     }
 
-    try { await new Promise(async (resolve) => {
+    try { await new Promise(async (resolve: (value: void) => void) => {
        const request = {
             ID: 'id-of-error',
             Method: 'Unsubscribe',
@@ -317,7 +317,7 @@ test('Check request to unsubscribe to Target', async () => {
         web.close();
     }
 
-    try { await new Promise(async (resolve) => {
+    try { await new Promise(async (resolve: (value: void) => void) => {
        const request = {
             ID: 'id-of-error',
             Method: 'Unsubscribe',
@@ -363,7 +363,7 @@ test('Three clients connect, one subscribes to Source and only one receives a no
         web.close();
     }
 
-    try { await new Promise(async (resolve, reject) => {
+    try { await new Promise(async (resolve: (value: void) => void, reject) => {
 
         const iSelected = Math.floor(Math.random() * clients.length);
         const timer = setTimeout(() => {
@@ -427,7 +427,7 @@ test('Three clients connect, one subscribes to Target and only one receives a no
         web.close();
     }
 
-    try { await new Promise(async (resolve, reject) => {
+    try { await new Promise(async (resolve: (value: void) => void, reject) => {
 
         const iSelected = Math.floor(Math.random() * clients.length);
         const timer = setTimeout(() => {
@@ -491,7 +491,7 @@ test('Three clients connect, two subscribes to Source, both receives, one unsubs
         web.close();
     }
 
-    try { await new Promise(async (resolve, reject) => {
+    try { await new Promise(async (resolve: (value: void) => void, reject) => {
 
         const iSelected = [0, 1];
         const timer = setTimeout(() => {
@@ -594,7 +594,7 @@ test('Three clients connect, two subscribes to Target, both receives, one unsubs
         web.close();
     }
 
-    try { await new Promise(async (resolve, reject) => {
+    try { await new Promise(async (resolve: (value: void) => void, reject) => {
 
         const iSelected = [0, 1];
         const timer = setTimeout(() => {

@@ -84,7 +84,7 @@ test('Reconnect and process the request', async () => {
 });
 
 test(`Two responses in 1 parts`, async () => {
-    try { await new Promise(async (resolve) => {
+    try { await new Promise(async (resolve: (value: void) => void) => {
         const expectedNotification = {
             "Context": {
                 "Source": "test",
@@ -126,7 +126,7 @@ test(`Two responses in 1 parts`, async () => {
 });
 
 test(`Two responses in 2 parts - first response broken, second response ok`, async () => {
-    try { await new Promise(async (resolve) => {
+    try { await new Promise(async (resolve: (value: void) => void) => {
         const expectedNotification = {
             "Context": {
                 "Source": "test",
@@ -168,7 +168,7 @@ test(`Two responses in 2 parts - first response broken, second response ok`, asy
 });
 
 test(`Two responses in 2 parts - first response ok, second response broken`, async () => {
-    try { await new Promise(async (resolve) => {
+    try { await new Promise(async (resolve: (value: void) => void) => {
         const expectedNotification = {
             "Context": {
                 "Source": "test",
@@ -210,7 +210,7 @@ test(`Two responses in 2 parts - first response ok, second response broken`, asy
 });
 
 test(`Two responses in 2 parts - first response broken, second response broken`, async () => {
-    try { await new Promise(async (resolve) => {
+    try { await new Promise(async (resolve: (value: void) => void) => {
         const expectedNotification = {
             "Context": {
                 "Source": "test",
@@ -252,7 +252,7 @@ test(`Two responses in 2 parts - first response broken, second response broken`,
 });
 
 test(`Two responses in 2 parts - first response ok(no EOL), second response broken`, async () => {
-    try { await new Promise(async (resolve) => {
+    try { await new Promise(async (resolve: (value: void) => void) => {
         const expectedNotification = {
             "Context": {
                 "Source": "test",
@@ -331,7 +331,7 @@ test('Three requests', async () => {
 });
 
 test(`One request - a response and a notification`, async () => {
-    try { await new Promise(async (resolve) => {
+    try { await new Promise(async (resolve: (value: void) => void) => {
         const expectedNotification = {
             "Context": {
                 "Source": "test",
@@ -373,7 +373,7 @@ test(`One request - a response and a notification`, async () => {
 });
 
 test(`Connect and wait - got a response and a notification`, async () => {
-    try { await new Promise(async (resolve, reject) => {
+    try { await new Promise(async (resolve: (value: void) => void, reject) => {
         let i = 0;
         const expectedNotification = {
             ID: '',
@@ -410,7 +410,7 @@ test(`Connect and wait - got a response and a notification`, async () => {
 });
 
 test(`Connect and wait - got a response and a notification but process only the notification`, async () => {
-    try { await new Promise(async (resolve) => {
+    try { await new Promise(async (resolve: (value: void) => void) => {
         const expectedNotification = {
             ID: '',
             Method: 'notification',
